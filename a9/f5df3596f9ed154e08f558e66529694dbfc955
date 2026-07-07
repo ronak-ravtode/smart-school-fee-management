@@ -1,0 +1,64 @@
+backend/package.json
+  s_f6fad58a313dea::t_ae70ff452c4fd9 31
+backend/src/lib/prisma.ts
+  s_f6fad58a313dea::t_8e58327383523f 1-11
+backend/prisma/migrations/20260707184208_init/migration.sql
+  s_f6fad58a313dea::t_2ed0c12b450273 1-126
+backend/src/routes/transaction.routes.ts
+  s_f6fad58a313dea::t_ce3acd2374681f 1-14
+backend/src/middleware/errorHandler.ts
+  s_f6fad58a313dea::t_09019334c74839 1-64
+backend/src/routes/student.routes.ts
+  s_f6fad58a313dea::t_b7407d1149c165 1-18
+backend/src/controllers/transaction.controller.ts
+  s_f6fad58a313dea::t_0b433b31098ae0 1-21
+backend/src/middleware/validate.ts
+  s_f6fad58a313dea::t_15c14f4a549e7c 1-24
+backend/src/controllers/student.controller.ts
+  s_f6fad58a313dea::t_c3c7b650ba3107 1-33
+backend/src/routes/feeType.routes.ts
+  s_f6fad58a313dea::t_d055364967f620 1-18
+backend/src/routes/feeStructure.routes.ts
+  s_f6fad58a313dea::t_4a88f22ee88a18 1-18
+backend/src/utils/apiResponse.ts
+  s_f6fad58a313dea::t_9aba036820f9f2 1-57
+backend/src/controllers/ledger.controller.ts
+  s_f6fad58a313dea::t_eb590cdcc2bad8 1-21
+backend/src/utils/asyncHandler.ts
+  s_f6fad58a313dea::t_ebe112b5742222 1-13
+backend/src/routes/health.routes.ts
+  s_f6fad58a313dea::t_982ec0c6a758f2 1-8
+backend/src/app.ts
+  s_f6fad58a313dea::t_3353330b912ba8 1-29
+backend/src/controllers/feeStructure.controller.ts
+  s_f6fad58a313dea::t_a93c66e820a82a 1-33
+backend/src/lib/errors.ts
+  s_f6fad58a313dea::t_2a26c25eebd5c9 1-4,6-10,13-17,19-45
+  s_f6fad58a313dea::t_e05d04d4885c53 5,11-12,18
+backend/prisma/migrations/migration_lock.toml
+  s_f6fad58a313dea::t_2ed0c12b450273 1-3
+backend/src/routes/ledger.routes.ts
+  s_f6fad58a313dea::t_b2cc189b3acc88 1-14
+backend/src/controllers/health.controller.ts
+  s_f6fad58a313dea::t_2ae718942d233c 1-14
+backend/src/controllers/feeType.controller.ts
+  s_f6fad58a313dea::t_bb002ce466569b 1-33
+backend/package-lock.json
+  s_f6fad58a313dea::t_14109830bb2a86 26,1024-1036,1113-1122,1560-1569,1633-1647
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a9f5df3596f9ed154e08f558e66529694dbfc955",
+  "prompts": {},
+  "sessions": {
+    "s_f6fad58a313dea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c229aafbfferCRsgt9dPqpgsM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
