@@ -1,0 +1,24 @@
+backend/src/modules/students/service.ts
+  s_f6fad58a313dea::t_477cd280b38b15 18-23,26-28
+  s_f6fad58a313dea::t_068ca9fcff4c28 76,79,82,87-98,100,102
+backend/src/modules/feeTypes/service.ts
+  s_f6fad58a313dea::t_7a297a17ab6c21 82-91
+backend/prisma/schema.prisma
+  s_f6fad58a313dea::t_71fa20bac63ef1 18,25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "38e5b27c9827e053c8cd60298c0ab063eda34e63",
+  "prompts": {},
+  "sessions": {
+    "s_f6fad58a313dea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c229aafbfferCRsgt9dPqpgsM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
