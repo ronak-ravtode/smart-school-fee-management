@@ -1,0 +1,26 @@
+backend/package.json
+  s_f6fad58a313dea::t_b272e6f3b18c56 7
+  s_f6fad58a313dea::t_84d288b390730f 4-6
+  s_f6fad58a313dea::t_01e0df8554bb34 8-10
+backend/src/index.ts
+  s_f6fad58a313dea::t_65fb3527541f60 1-2
+  s_f6fad58a313dea::t_a2dffd30070f64 3-5
+backend/package-lock.json
+  s_f6fad58a313dea::t_0cd553a53577af 1-1688
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "1caa814d08036f35668db36d13ff40db4c6b51fb",
+  "prompts": {},
+  "sessions": {
+    "s_f6fad58a313dea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c229aafbfferCRsgt9dPqpgsM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
