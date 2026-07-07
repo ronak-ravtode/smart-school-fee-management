@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "A:\\SmartSchoolFee"
+      ],
+      "description": "Filesystem access restricted to project root"
+    },
+    "terminal": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-terminal",
+        "--workdir",
+        "A:\\SmartSchoolFee"
+      ],
+      "description": "Execute npm scripts, prisma commands, and tsc typecheck"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/smartschoolfee"
+      ],
+      "env": {
+        "PGSSLMODE": "disable"
+      },
+      "description": "Read-only PostgreSQL access for verifying data states"
+    }
+  }
+}

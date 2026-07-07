@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Student ──────────────────────────────────────────────────────────────────
+
+model Student {
+  id          String   @id @default(uuid()) @map("id")
+  name        String   @map("name")
+  email       String   @unique @map("email")
+  class       String   @map("class")
+  section     String   @map("section")
+  rollNumber  String   @unique @map("roll_number")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  ledgers StudentFeeLedger[]
+
+  @@map("students")
+}
+
+// ─── FeeType ──────────────────────────────────────────────────────────────────
+
+model FeeType {
+  id          String   @id @default(uuid()) @map("id")
+  name        String   @unique @map("name")
+  baseAmount  Decimal  @db.Decimal(10, 2) @map("base_amount")
+  rules       Json?    @map("rules")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  feeStructures FeeStructure[]
+
+  @@map("fee_types")
+}
+
+// ─── FeeStructure ─────────────────────────────────────────────────────────────
+// Maps a FeeType to a specific Class + Section combination.
+
+model FeeStructure {
+  id         String  @id @default(uuid()) @map("id")
+  feeTypeId  String  @map("fee_type_id")
+  class      String  @map("class")
+  section    String  @map("section")
+  amount     Decimal @db.Decimal(10, 2) @map("amount")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  feeType    FeeType            @relation(fields: [feeTypeId], references: [id], onDelete: Cascade)
+  ledgers    StudentFeeLedger[]
+
+  // One active structure per fee-type + class + section
+  @@unique([feeTypeId, class, section])
+  @@index([class, section])
+  @@map("fee_structures")
+}
+
+// ─── StudentFeeLedger ─────────────────────────────────────────────────────────
+// Core financial record: tracks what a student owes.
+
+model StudentFeeLedger {
+  id             String        @id @default(uuid()) @map("id")
+  studentId      String        @map("student_id")
+  feeStructureId String        @map("fee_structure_id")
+  totalAmount    Decimal       @db.Decimal(10, 2) @map("total_amount")
+  waivedAmount   Decimal       @default(0) @db.Decimal(10, 2) @map("waived_amount")
+  paidAmount     Decimal       @default(0) @db.Decimal(10, 2) @map("paid_amount")
+  dueDate        DateTime      @map("due_date")
+  status         LedgerStatus  @default(PENDING) @map("status")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feeStructure FeeStructure     @relation(fields: [feeStructureId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  // Frequently queried combinations
+  @@index([studentId])
+  @@index([status])
+  @@index([studentId, status])
+  @@index([dueDate])
+  @@map("student_fee_ledgers")
+}
+
+// ─── Transaction ──────────────────────────────────────────────────────────────
+// Represents an actual payment event.
+
+model Transaction {
+  id             String            @id @default(uuid()) @map("id")
+  ledgerId       String            @map("ledger_id")
+  amount         Decimal           @db.Decimal(10, 2) @map("amount")
+  paymentMethod  PaymentMethod     @map("payment_method")
+  transactionRef String?           @map("transaction_ref")
+  receiptNumber  String?           @unique @map("receipt_number")
+  status         TransactionStatus @default(PENDING) @map("status")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  ledger StudentFeeLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
+
+  @@index([ledgerId])
+  @@index([status])
+  @@map("transactions")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum LedgerStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  UPI
+  CASH
+  CHEQUE
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
