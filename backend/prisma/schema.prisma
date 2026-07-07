@@ -15,13 +15,14 @@ model Student {
   email       String   @unique @map("email")
   class       String   @map("class")
   section     String   @map("section")
-  rollNumber  String   @unique @map("roll_number")
+  rollNumber  String   @map("roll_number")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
   ledgers StudentFeeLedger[]
 
+  @@unique([rollNumber, class, section])
   @@map("students")
 }
 

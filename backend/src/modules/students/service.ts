@@ -15,11 +15,17 @@ export async function createStudent(data: CreateStudentInput) {
     throw new ConflictError("A student with this email already exists");
   }
 
-  const existingRoll = await prisma.student.findUnique({
-    where: { rollNumber: data.rollNumber },
+  const existingRoll = await prisma.student.findFirst({
+    where: {
+      rollNumber: data.rollNumber,
+      class: data.class,
+      section: data.section,
+    },
   });
   if (existingRoll) {
-    throw new ConflictError("A student with this roll number already exists");
+    throw new ConflictError(
+      `A student with roll number '${data.rollNumber}' already exists in class ${data.class} section ${data.section}`
+    );
   }
 
   return prisma.student.create({ data });
@@ -67,24 +73,33 @@ export async function getStudentById(id: string) {
 }
 
 export async function updateStudent(id: string, data: UpdateStudentInput) {
-  await getStudentById(id);
+  const existing = await getStudentById(id);
 
   if (data.email) {
-    const existing = await prisma.student.findFirst({
+    const duplicateEmail = await prisma.student.findFirst({
       where: { email: data.email, NOT: { id } },
     });
-    if (existing) {
+    if (duplicateEmail) {
       throw new ConflictError("A student with this email already exists");
     }
   }
 
-  if (data.rollNumber) {
-    const existing = await prisma.student.findFirst({
-      where: { rollNumber: data.rollNumber, NOT: { id } },
+  if (data.rollNumber || data.class || data.section) {
+    const targetClass = data.class ?? existing.class;
+    const targetSection = data.section ?? existing.section;
+    const targetRoll = data.rollNumber ?? existing.rollNumber;
+
+    const duplicateRoll = await prisma.student.findFirst({
+      where: {
+        rollNumber: targetRoll,
+        class: targetClass,
+        section: targetSection,
+        NOT: { id },
+      },
     });
-    if (existing) {
+    if (duplicateRoll) {
       throw new ConflictError(
-        "A student with this roll number already exists"
+        `A student with roll number '${targetRoll}' already exists in class ${targetClass} section ${targetSection}`
       );
     }
   }

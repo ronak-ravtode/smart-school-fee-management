@@ -79,5 +79,15 @@ export async function updateFeeType(id: string, data: UpdateFeeTypeInput) {
 
 export async function deleteFeeType(id: string) {
   await getFeeTypeById(id);
+
+  const linkedStructures = await prisma.feeStructure.count({
+    where: { feeTypeId: id },
+  });
+  if (linkedStructures > 0) {
+    throw new ConflictError(
+      `Cannot delete fee type: ${linkedStructures} fee structure(s) still reference it. Remove them first.`
+    );
+  }
+
   return prisma.feeType.delete({ where: { id } });
 }
