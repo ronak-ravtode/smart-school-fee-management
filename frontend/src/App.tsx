@@ -5,6 +5,9 @@ import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { SyncManager } from "@/components/sync/SyncManager";
 import { Dashboard } from "@/pages/Dashboard";
 import { BulkReconciliation } from "@/pages/BulkReconciliation";
+import { FeeTypesPage } from "@/pages/fee-types/FeeTypesPage";
+import { FeeStructuresPage } from "@/pages/fee-types/FeeStructuresPage";
+import { GenerateLedgerPage } from "@/pages/ledgers/GenerateLedgerPage";
 import { useSyncStore } from "@/store/syncStore";
 
 function App() {
@@ -21,6 +24,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/bulk-reconciliation" element={<BulkReconciliation />} />
+          <Route path="/fee-types" element={<FeeTypesPage />} />
+          <Route path="/fee-structures" element={<FeeStructuresPage />} />
+          <Route path="/ledgers/generate" element={<GenerateLedgerPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

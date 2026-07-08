@@ -9,6 +9,7 @@ import { feeStructureModuleRoutes } from "@/modules/feeStructures/routes";
 import { ledgerModuleRoutes } from "@/modules/ledgers/routes";
 import { transactionModuleRoutes } from "@/modules/transactions/routes";
 import { dashboardRoutes } from "@/modules/dashboard/routes";
+import { receiptModuleRoutes } from "@/modules/receipts/routes";
 import { handleUPIWebhook } from "@/controllers/webhookController";
 import { errorHandler } from "@/middleware/errorHandler";
 
@@ -26,6 +27,7 @@ app.use("/api/v1/fee-structures", feeStructureModuleRoutes);
 app.use("/api/v1/ledgers", ledgerModuleRoutes);
 app.use("/api/v1/transactions", transactionModuleRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/receipts", receiptModuleRoutes);
 
 app.post("/api/v1/webhooks/upi", handleUPIWebhook);
 

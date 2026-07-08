@@ -12,6 +12,8 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/", materialIcon: "dashboard" },
   { label: "Students", href: "/students", materialIcon: "group" },
   { label: "Fee Types", href: "/fee-types", materialIcon: "payments" },
+  { label: "Fee Structures", href: "/fee-structures", materialIcon: "account_tree" },
+  { label: "Generate Ledgers", href: "/ledgers/generate", materialIcon: "receipt_long" },
   { label: "Transactions", href: "/transactions", materialIcon: "receipt_long" },
   { label: "Bulk Reconcile", href: "/bulk-reconciliation", materialIcon: "receipt_long" },
   { label: "Settings", href: "/settings", materialIcon: "settings" },
