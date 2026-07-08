@@ -1,0 +1,64 @@
+backend/prisma/seed.ts
+  s_f6fad58a313dea::t_53a3a1ab8734d2 1-306
+frontend/src/components/layout/TopBar.tsx
+  s_f6fad58a313dea::t_90e13828eab7b7 1,8,15-27,29,33,68-119
+  s_f6fad58a313dea::t_3b2947f53c73e5 2-3,5-6,12-14,28,30-32,34-38,61
+frontend/src/pages/Login.tsx
+  s_f6fad58a313dea::t_abec5103739ffa 9-240
+  s_f6fad58a313dea::t_bcb2a2cf9a0698 6-8
+  s_f6fad58a313dea::t_b9595be5b99011 241-243
+backend/src/modules/auth/service.ts
+  s_f6fad58a313dea::t_ce4c511cb92ccb 4-57,59-64,66,68-69,73,77
+  s_f6fad58a313dea::t_759efa69dfc2bb 1-3
+  s_f6fad58a313dea::t_153539edb55704 58
+  s_f6fad58a313dea::t_ed78aa74968bda 65
+  s_f6fad58a313dea::t_f2aed794a81248 67
+  s_f6fad58a313dea::t_021e3e4c98e1d7 70-72
+  s_f6fad58a313dea::t_33c8e83529332a 74-76
+backend/src/modules/auth/schemas.ts
+  s_f6fad58a313dea::t_4cf911f1e7f0d5 4,6,8-16
+  s_f6fad58a313dea::t_ca8199643b3d95 1-3
+  s_f6fad58a313dea::t_50f29c56b14014 5
+  s_f6fad58a313dea::t_f555b28c6ee9d8 7
+backend/src/modules/auth/controller.ts
+  s_f6fad58a313dea::t_7b2f26b8ad1efc 4-41,53,58
+  s_f6fad58a313dea::t_75285e5fff0c95 1-3
+  s_f6fad58a313dea::t_866530995c2657 42-44,50-52
+  s_f6fad58a313dea::t_b1398f5d6835a6 54-57
+backend/src/modules/auth/routes.ts
+  s_f6fad58a313dea::t_3cfd959dcf0e5d 4-10
+  s_f6fad58a313dea::t_349160286b5b55 1-3
+  s_f6fad58a313dea::t_d7a35cb830859c 11-13
+backend/package-lock.json
+  s_35cfabe18fc201::t_c2d8400e384407 13-14,20,26-27,30,233-239,261-270,287,314-324,335-341,486-494,537-542,692-710,841-849,1254-1302,1322-1363,1789-1800
+backend/package.json
+  s_35cfabe18fc201::t_0c0ed2afce8abf 18-19,25,30-32,34-35,38
+backend/src/app.ts
+  s_35cfabe18fc201::t_94ab492cc252b4 5,7,16-17,22,26,28,30,32-43
+backend/src/middleware/errorHandler.ts
+  s_35cfabe18fc201::t_30d34af80623b7 4,41-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f6191e125ab2e33203b52932232e0a12222692eb",
+  "prompts": {},
+  "sessions": {
+    "s_35cfabe18fc201": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c21f4b3dffe1BuGnEeEeDmIO3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_f6fad58a313dea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c229aafbfferCRsgt9dPqpgsM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
