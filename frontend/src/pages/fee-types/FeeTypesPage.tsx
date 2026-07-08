@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,8 +30,10 @@ import type { FeeType, FeeRules, CreateFeeTypeInput } from "@/types/fees";
 export function FeeTypesPage() {
   const queryClient = useQueryClient();
   const { addToast, sidebarCollapsed } = useUIStore();
+  const { user } = useAuthStore();
   const [showCreate, setShowCreate] = useState(false);
   const [editingFeeType, setEditingFeeType] = useState<FeeType | null>(null);
+  const isAdmin = user?.role === "ADMIN";
 
   const { data: feeTypesData, isLoading } = useQuery({
     queryKey: ["fee-types"],
@@ -105,13 +108,15 @@ export function FeeTypesPage() {
                 Configure fee categories and their rules
               </p>
             </div>
-            <Button
-              onClick={() => setShowCreate(true)}
-              className="bg-primary text-white hover:bg-primary/90 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Create Fee Type
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => setShowCreate(true)}
+                className="bg-primary text-white hover:bg-primary/90 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create Fee Type
+              </Button>
+            )}
           </div>
         </div>
 

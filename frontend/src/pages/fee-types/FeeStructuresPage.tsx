@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +47,9 @@ function cn(...classes: (string | boolean | undefined)[]) {
 export function FeeStructuresPage() {
   const queryClient = useQueryClient();
   const { addToast, sidebarCollapsed } = useUIStore();
+  const { user } = useAuthStore();
   const [showCreate, setShowCreate] = useState(false);
+  const isAdmin = user?.role === "ADMIN";
 
   const { data: feeTypesData } = useQuery({
     queryKey: ["fee-types"],
@@ -110,13 +113,15 @@ export function FeeStructuresPage() {
                 Map fee types to classes and sections
               </p>
             </div>
-            <Button
-              onClick={() => setShowCreate(true)}
-              className="bg-primary text-white hover:bg-primary/90 flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Create Fee Structure
-            </Button>
+            {isAdmin && (
+              <Button
+                onClick={() => setShowCreate(true)}
+                className="bg-primary text-white hover:bg-primary/90 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create Fee Structure
+              </Button>
+            )}
           </div>
         </div>
 
