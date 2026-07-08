@@ -1,13 +1,4 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
+import { useState } from "react";
 import type { RevenueByFeeType } from "@/types/dashboard";
 
 interface RevenueChartProps {
@@ -15,14 +6,21 @@ interface RevenueChartProps {
   isLoading: boolean;
 }
 
-const COLORS = [
-  "url(#gradientIndigo)",
-  "url(#gradientEmerald)",
-  "url(#gradientAmber)",
-  "url(#gradientRose)",
-  "url(#gradientPurple)",
-  "url(#gradientCyan)",
-];
+const BAR_COLORS: Record<string, string> = {
+  Transport: "#D97706",
+  FinTransport: "#D97706",
+  Library: "#F59E0B",
+  default: "rgba(217, 119, 6, 0.6)",
+  low: "rgba(217, 119, 6, 0.35)",
+};
+
+function getBarColor(name: string, index: number): string {
+  if (BAR_COLORS[name]) return BAR_COLORS[name];
+  if (index < 2) return BAR_COLORS.Transport;
+  if (index === 2) return BAR_COLORS.Library;
+  if (index < 5) return BAR_COLORS.default;
+  return BAR_COLORS.low;
+}
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-IN", {
@@ -32,112 +30,113 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-interface TooltipPayload {
-  active?: boolean;
-  payload?: Array<{
-    value: number;
-    payload: RevenueByFeeType;
-  }>;
-}
-
-function CustomTooltip({ active, payload }: TooltipPayload) {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="glass-card rounded-xl p-4 shadow-xl border border-white/60">
-        <p className="font-bold text-slate-900">{data.feeTypeName}</p>
-        <p className="text-sm text-slate-600 mt-1">
-          <span className="font-semibold text-indigo-600">{formatCurrency(data.totalAmount)}</span>
-        </p>
-        <p className="text-xs text-slate-500 mt-0.5">
-          {data.ledgerCount} ledger{data.ledgerCount !== 1 ? 's' : ''}
-        </p>
-      </div>
-    );
-  }
-  return null;
-}
-
 export function RevenueChart({ data, isLoading }: RevenueChartProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const chartHeight = 240;
+  const maxValue = data && data.length > 0 ? Math.max(...data.map((d) => d.totalAmount)) : 1;
+
   return (
-    <div className="glass-card rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-5">
+    <div className="paper-stack p-8 rounded-lg h-full animate-fade-slide-up" style={{ animationDelay: "320ms" }}>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-10">
         <div>
-          <h3 className="text-lg font-bold text-slate-900">Revenue by Fee Type</h3>
-          <p className="text-sm text-slate-500 mt-0.5">Total collection breakdown</p>
+          <h4 className="text-2xl font-bold text-on-surface" style={{ fontFamily: "Crimson Text" }}>
+            Revenue by Fee Type
+          </h4>
+          <p className="text-on-surface-variant text-sm font-medium">
+            Total collection breakdown by category
+          </p>
         </div>
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        </div>
+        <button className="bg-stone-100 p-2 rounded-lg hover:bg-primary hover:text-white transition-all">
+          <span className="material-symbols-outlined">bar_chart</span>
+        </button>
       </div>
 
+      {/* Chart */}
       {isLoading ? (
-        <div className="h-[300px] bg-slate-100/50 animate-pulse rounded-xl" />
+        <div className="bg-stone-100 animate-pulse rounded-lg" style={{ height: chartHeight }} />
       ) : !data || data.length === 0 ? (
-        <div className="h-[300px] flex items-center justify-center text-slate-400">
+        <div className="flex items-center justify-center" style={{ height: chartHeight }}>
           <div className="text-center">
-            <svg className="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <p className="text-sm font-medium">No revenue data available</p>
+            <span className="material-symbols-outlined text-5xl text-stone-300 mb-3">bar_chart</span>
+            <p className="text-sm font-medium text-stone-500">No revenue data available</p>
           </div>
         </div>
       ) : (
-        <div className="bg-white/50 rounded-xl p-4 border border-slate-100">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradientIndigo" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#818cf8" />
-                  <stop offset="100%" stopColor="#6366f1" />
-                </linearGradient>
-                <linearGradient id="gradientEmerald" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#34d399" />
-                  <stop offset="100%" stopColor="#10b981" />
-                </linearGradient>
-                <linearGradient id="gradientAmber" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="100%" stopColor="#f59e0b" />
-                </linearGradient>
-                <linearGradient id="gradientRose" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fb7185" />
-                  <stop offset="100%" stopColor="#f43f5e" />
-                </linearGradient>
-                <linearGradient id="gradientPurple" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#c084fc" />
-                  <stop offset="100%" stopColor="#a855f7" />
-                </linearGradient>
-                <linearGradient id="gradientCyan" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#22d3ee" />
-                  <stop offset="100%" stopColor="#06b6d4" />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-              <XAxis
-                dataKey="feeTypeName"
-                tick={{ fill: "#64748b", fontSize: 12, fontFamily: "DM Sans" }}
-                axisLine={{ stroke: "#e2e8f0" }}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fill: "#64748b", fontSize: 12, fontFamily: "DM Sans" }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(value: number) => `₹${(value / 1000).toFixed(0)}k`}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(99, 102, 241, 0.05)" }} />
-              <Bar dataKey="totalAmount" radius={[8, 8, 0, 0]} barSize={40}>
-                {data.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <div>
+          {/* Y-axis labels + Chart area */}
+          <div className="flex">
+            {/* Y-axis */}
+            <div className="flex flex-col justify-between pr-3" style={{ height: chartHeight }}>
+              <span className="text-[10px] text-stone-400 font-medium">{formatCurrency(maxValue)}</span>
+              <span className="text-[10px] text-stone-400 font-medium">{formatCurrency(maxValue * 0.75)}</span>
+              <span className="text-[10px] text-stone-400 font-medium">{formatCurrency(maxValue * 0.5)}</span>
+              <span className="text-[10px] text-stone-400 font-medium">{formatCurrency(maxValue * 0.25)}</span>
+              <span className="text-[10px] text-stone-400 font-medium">₹0</span>
+            </div>
+
+            {/* Chart bars */}
+            <div className="flex-1 relative" style={{ height: chartHeight }}>
+              {/* Grid lines */}
+              {[0, 0.25, 0.5, 0.75, 1].map((pct) => (
+                <div
+                  key={pct}
+                  className="absolute left-0 right-0 border-t border-stone-200/60"
+                  style={{ bottom: `${pct * 100}%` }}
+                />
+              ))}
+
+              {/* Bars */}
+              <div className="absolute inset-0 flex items-end justify-around" style={{ paddingBottom: 0 }}>
+                {data.map((item, index) => {
+                  const barHeightPx = maxValue > 0 ? (item.totalAmount / maxValue) * chartHeight : 0;
+                  const isHovered = hoveredIndex === index;
+
+                  return (
+                    <div
+                      key={item.feeTypeName}
+                      className="flex flex-col items-center"
+                      style={{ width: 64 }}
+                      onMouseEnter={() => setHoveredIndex(index)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                    >
+                      {/* Tooltip */}
+                      {isHovered && (
+                        <div
+                          className="absolute left-1/2 -translate-x-1/2 bg-stone-800 text-white text-[11px] font-medium py-1.5 px-3 rounded shadow-lg whitespace-nowrap z-10"
+                          style={{ bottom: barHeightPx + 8 }}
+                        >
+                          {formatCurrency(item.totalAmount)}
+                        </div>
+                      )}
+
+                      {/* Bar */}
+                      <div
+                        className="w-10 rounded-t-md cursor-pointer transition-opacity"
+                        style={{
+                          height: Math.max(barHeightPx, 4),
+                          backgroundColor: getBarColor(item.feeTypeName, index),
+                          opacity: isHovered ? 1 : 0.9,
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* X-axis labels */}
+          <div className="flex justify-around mt-3">
+            {data.map((item, index) => (
+              <div key={item.feeTypeName} className="text-center" style={{ width: 64 }}>
+                <p className="text-[9px] font-bold text-stone-400 uppercase leading-tight truncate">
+                  {item.feeTypeName}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

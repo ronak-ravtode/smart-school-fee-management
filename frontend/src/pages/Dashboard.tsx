@@ -41,39 +41,61 @@ export function Dashboard() {
 
   return (
     <div className={cn(
-      "min-h-screen pt-20 pr-8 pb-8 transition-all duration-300",
-      sidebarCollapsed ? "pl-[88px]" : "pl-[276px]"
+      "ml-64 min-h-screen transition-all duration-300",
+      sidebarCollapsed && "ml-[72px]"
     )}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-        <p className="text-slate-500 mt-1">
-          Welcome back! Here's what's happening with your school fees.
-        </p>
-      </div>
-
-      <MetricCards
-        metrics={metricsData?.data}
-        isLoading={metricsLoading}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-        <div className="lg:col-span-3">
-          <RevenueChart
-            data={revenueData?.data}
-            isLoading={revenueLoading}
-          />
+      {/* Page Canvas */}
+      <div className="pt-24 px-8 pb-8">
+        {/* Header */}
+        <div className="mb-8 animate-fade-slide-up">
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-3xl font-bold text-on-surface" style={{ fontFamily: "Crimson Text" }}>
+              Dashboard
+            </h2>
+            <div className="w-2 h-2 rounded-full bg-primary mt-1 animate-pulse-dot" />
+          </div>
+          <p className="text-on-surface-variant text-sm font-medium">
+            Welcome back! Here's what's happening with your school fees.
+          </p>
         </div>
 
-        <div className="lg:col-span-2">
-          <DefaulterTable
-            data={defaultersData?.data}
-            isLoading={defaultersLoading}
-            onRecordPayment={handleRecordPayment}
-            onSendReminder={handleSendReminder}
-          />
+        {/* Metric Cards */}
+        <MetricCards
+          metrics={metricsData?.data}
+          isLoading={metricsLoading}
+        />
+
+        {/* Charts & Tables Grid */}
+        <div className="grid grid-cols-12 gap-4 mt-4">
+          {/* Revenue Chart - 8 cols */}
+          <div className="col-span-12 md:col-span-8">
+            <RevenueChart
+              data={revenueData?.data}
+              isLoading={revenueLoading}
+            />
+          </div>
+
+          {/* Defaulters - 4 cols */}
+          <div className="col-span-12 md:col-span-4">
+            <DefaulterTable
+              data={defaultersData?.data}
+              isLoading={defaultersLoading}
+              onRecordPayment={handleRecordPayment}
+              onSendReminder={handleSendReminder}
+            />
+          </div>
         </div>
       </div>
 
+      {/* FAB Button */}
+      <button className="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-lg shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50 group border border-primary/20">
+        <span className="material-symbols-outlined text-3xl">add</span>
+        <span className="absolute right-full mr-4 bg-stone-800 text-white px-4 py-2 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          New Transaction
+        </span>
+      </button>
+
+      {/* Payment Dialog */}
       {selectedDefaulter && (
         <RecordPaymentDialog
           studentId={selectedDefaulter.studentId}

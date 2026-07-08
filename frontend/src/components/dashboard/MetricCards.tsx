@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
 import type { DashboardMetrics } from "@/types/dashboard";
 
@@ -20,86 +19,113 @@ const cards = [
     key: "expected" as const,
     title: "Total Expected",
     getValue: (m: DashboardMetrics) => m.totalExpected,
-    icon: DollarSign,
-    gradient: "from-indigo-500 via-blue-500 to-cyan-400",
-    bgGlow: "bg-indigo-50",
-    iconBg: "bg-gradient-to-br from-indigo-500 to-blue-600",
-    accentBar: "from-indigo-500 to-blue-500",
-    valueColor: "text-slate-900",
+    materialIcon: "payments",
+    containerColor: "bg-primary-container text-primary",
+    delay: 0,
+    footer: (m: DashboardMetrics | undefined) => ({
+      icon: "trending_up",
+      text: "8% from last term",
+      color: "text-primary",
+    }),
   },
   {
     key: "collected" as const,
     title: "Collected",
     getValue: (m: DashboardMetrics) => m.totalCollected,
     getSubtitle: (m: DashboardMetrics) => `${m.collectionPercentage}% collected`,
-    icon: CheckCircle,
-    gradient: "from-emerald-400 via-teal-500 to-cyan-400",
-    bgGlow: "bg-emerald-50",
-    iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
-    accentBar: "from-emerald-400 to-teal-500",
-    valueColor: "text-slate-900",
-    subtitleColor: "text-emerald-600",
+    materialIcon: "check_circle",
+    containerColor: "bg-tertiary-container text-tertiary",
+    delay: 80,
+    footer: (m: DashboardMetrics | undefined) => ({
+      showProgress: true,
+      progress: m?.collectionPercentage ?? 0,
+      text: `${m?.collectionPercentage ?? 0}% collected`,
+      color: "text-tertiary",
+    }),
   },
   {
     key: "pending" as const,
     title: "Pending",
     getValue: (m: DashboardMetrics) => m.totalPending,
-    icon: TrendingUp,
-    gradient: "from-amber-400 via-orange-400 to-yellow-400",
-    bgGlow: "bg-amber-50",
-    iconBg: "bg-gradient-to-br from-amber-400 to-orange-500",
-    accentBar: "from-amber-400 to-orange-400",
-    valueColor: "text-slate-900",
+    materialIcon: "history",
+    containerColor: "bg-secondary-container text-secondary",
+    delay: 160,
+    footer: (m: DashboardMetrics | undefined) => ({
+      text: "12 invoices pending",
+      color: "text-secondary",
+    }),
   },
   {
     key: "overdue" as const,
     title: "Overdue",
     getValue: (m: DashboardMetrics) => m.totalOverdue,
-    icon: AlertTriangle,
-    gradient: "from-rose-400 via-pink-500 to-red-500",
-    bgGlow: "bg-rose-50",
-    iconBg: "bg-gradient-to-br from-rose-500 to-pink-600",
-    accentBar: "from-rose-400 to-pink-500",
-    valueColor: "text-slate-900",
+    materialIcon: "warning",
+    containerColor: "bg-error-container text-error",
+    delay: 240,
+    footer: (m: DashboardMetrics | undefined) => ({
+      icon: "verified_user",
+      text: "System all clear",
+      color: "text-tertiary",
+    }),
   },
 ];
 
 export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {cards.map((card) => {
-        const Icon = card.icon;
         const value = metrics ? card.getValue(metrics) : 0;
-        const subtitle = metrics && card.getSubtitle ? card.getSubtitle(metrics) : null;
+        const footer = card.footer(metrics);
 
         return (
           <div
             key={card.key}
-            className="metric-card glass-card rounded-2xl p-5 relative overflow-hidden"
-            style={{ ["--accent-gradient" as string]: `linear-gradient(135deg, var(--tw-gradient-stops))` }}
+            className="paper-stack p-6 rounded-lg flex flex-col justify-between group transition-all hover:-translate-y-1 animate-fade-slide-up"
+            style={{ animationDelay: `${card.delay}ms` }}
           >
-            <div className={`absolute inset-0 ${card.bgGlow} opacity-40`} />
-            <div className="relative flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                <p className="text-stone-400 text-[10px] font-bold uppercase tracking-wider">
                   {card.title}
                 </p>
-                {isLoading ? (
-                  <div className="h-8 w-24 bg-slate-200/60 animate-pulse rounded-lg mt-2" />
-                ) : (
-                  <p className={`text-2xl font-bold mt-2 ${card.valueColor}`}>
-                    {formatCurrency(value)}
-                  </p>
-                )}
-                {subtitle && !isLoading && (
-                  <p className={`text-xs font-semibold mt-2 ${card.subtitleColor ?? 'text-slate-500'}`}>
-                    {subtitle}
-                  </p>
-                )}
+                <div className={`p-2.5 ${card.containerColor} rounded-lg`}>
+                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    {card.materialIcon}
+                  </span>
+                </div>
               </div>
-              <div className={`w-11 h-11 rounded-xl ${card.iconBg} flex items-center justify-center shadow-lg`}>
-                <Icon className="w-5 h-5 text-white" />
-              </div>
+              {isLoading ? (
+                <div className="h-8 w-24 bg-stone-100 animate-pulse rounded" />
+              ) : (
+                <h3 className="text-2xl font-bold text-on-surface" style={{ fontFamily: "Crimson Text" }}>
+                  {formatCurrency(value)}
+                </h3>
+              )}
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-stone-100">
+              {footer.showProgress ? (
+                <>
+                  <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-tertiary h-full rounded-full transition-all duration-1000"
+                      style={{ width: `${Math.min(footer.progress, 100)}%` }}
+                    />
+                  </div>
+                  <p className={`text-[10px] font-bold ${footer.color} mt-2`}>{footer.text}</p>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {footer.icon && (
+                    <span className={`material-symbols-outlined text-sm ${footer.color}`}>
+                      {footer.icon}
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-bold ${footer.color}`}>
+                    {footer.text}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         );
