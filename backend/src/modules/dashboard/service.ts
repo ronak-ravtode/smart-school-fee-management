@@ -20,6 +20,7 @@ export interface DefaulterRecord {
   remaining: number;
   status: "OVERDUE" | "PARTIAL";
   ledgerCount: number;
+  ledgerId: string;
 }
 
 export interface RevenueByFeeType {
@@ -117,6 +118,22 @@ export async function getDefaults(
 
   const studentMap = new Map(students.map((s) => [s.id, s]));
 
+  const outstandingLedgers = await prisma.studentFeeLedger.findMany({
+    where: {
+      studentId: { in: studentIds },
+      status: { in: ["OVERDUE", "PARTIAL"] },
+    },
+    orderBy: { dueDate: "asc" },
+    select: { id: true, studentId: true },
+  });
+
+  const primaryLedgerMap = new Map<string, string>();
+  for (const ledger of outstandingLedgers) {
+    if (!primaryLedgerMap.has(ledger.studentId)) {
+      primaryLedgerMap.set(ledger.studentId, ledger.id);
+    }
+  }
+
   const data: DefaulterRecord[] = grouped.map((g) => {
     const student = studentMap.get(g.studentId);
     const totalDue = Number(g._sum.totalAmount ?? 0);
@@ -133,8 +150,9 @@ export async function getDefaults(
       totalDue,
       totalPaid,
       remaining,
-      status: remaining > 0 ? "OVERDUE" : "PARTIAL",
+      status: remaining >= totalDue ? "OVERDUE" : "PARTIAL",
       ledgerCount: g._count.id,
+      ledgerId: primaryLedgerMap.get(g.studentId) ?? "",
     };
   });
 

@@ -17,6 +17,7 @@ export interface DefaulterRecord {
   remaining: number;
   status: "OVERDUE" | "PARTIAL";
   ledgerCount: number;
+  ledgerId: string;
 }
 
 export interface RevenueByFeeType {

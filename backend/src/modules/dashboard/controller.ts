@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "@/utils/asyncHandler";
-import { sendSuccess } from "@/utils/apiResponse";
+import { sendSuccess, sendPaginatedSuccess } from "@/utils/apiResponse";
 import * as dashboardService from "./service";
 
 export const getMetrics = asyncHandler(
@@ -16,7 +16,7 @@ export const getDefaults = asyncHandler(
     const limit = Number(req.query.limit) || 20;
     const result = await dashboardService.getDefaults(page, limit);
     res.json(
-      sendSuccess(result.data, "Defaulters fetched")
+      sendPaginatedSuccess(result.data, { total: result.total, page: result.page, limit: result.limit }, "Defaulters fetched")
     );
   }
 );

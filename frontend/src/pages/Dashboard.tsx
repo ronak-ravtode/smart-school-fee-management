@@ -4,7 +4,7 @@ import { apiClient } from "@/lib/api";
 import { MetricCards } from "@/components/dashboard/MetricCards";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { DefaulterTable } from "@/components/dashboard/DefaulterTable";
-import { RecordPaymentDialog } from "@/components/dashboard/RecordPaymentDialog";
+import { SinglePaymentModal } from "@/components/payments/SinglePaymentModal";
 import { useUIStore } from "@/store/uiStore";
 import { cn } from "@/lib/utils";
 import type { DashboardMetrics, DefaulterRecord, RevenueByFeeType } from "@/types/dashboard";
@@ -97,10 +97,11 @@ export function Dashboard() {
 
       {/* Payment Dialog */}
       {selectedDefaulter && (
-        <RecordPaymentDialog
+        <SinglePaymentModal
           studentId={selectedDefaulter.studentId}
           studentName={selectedDefaulter.studentName}
           remaining={selectedDefaulter.remaining}
+          ledgerId={selectedDefaulter.ledgerId}
         />
       )}
     </div>

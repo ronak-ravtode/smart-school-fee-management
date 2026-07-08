@@ -1,34 +1,25 @@
-import { useState } from "react";
-import {
-  LayoutDashboard,
-  Users,
-  CreditCard,
-  Receipt,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 import { useUIStore } from "@/store/uiStore";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
-  icon: React.ElementType;
   label: string;
   href: string;
   materialIcon: string;
 }
 
 const navItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/", materialIcon: "dashboard" },
-  { icon: Users, label: "Students", href: "/students", materialIcon: "group" },
-  { icon: CreditCard, label: "Fee Types", href: "/fee-types", materialIcon: "payments" },
-  { icon: Receipt, label: "Transactions", href: "/transactions", materialIcon: "receipt_long" },
-  { icon: Settings, label: "Settings", href: "/settings", materialIcon: "settings" },
+  { label: "Dashboard", href: "/", materialIcon: "dashboard" },
+  { label: "Students", href: "/students", materialIcon: "group" },
+  { label: "Fee Types", href: "/fee-types", materialIcon: "payments" },
+  { label: "Transactions", href: "/transactions", materialIcon: "receipt_long" },
+  { label: "Bulk Reconcile", href: "/bulk-reconciliation", materialIcon: "receipt_long" },
+  { label: "Settings", href: "/settings", materialIcon: "settings" },
 ];
 
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
-  const [activeItem, setActiveItem] = useState("/");
+  const location = useLocation();
 
   return (
     <aside
@@ -62,11 +53,11 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => {
-          const isActive = activeItem === item.href;
+          const isActive = location.pathname === item.href;
           return (
-            <button
+            <Link
               key={item.href}
-              onClick={() => setActiveItem(item.href)}
+              to={item.href}
               className={cn(
                 "flex items-center gap-3 w-full text-left transition-all duration-200",
                 sidebarCollapsed ? "justify-center px-2 py-3 mx-0 rounded-lg" : "px-4 py-3 mx-2 rounded-lg",
@@ -84,7 +75,7 @@ export function Sidebar() {
               {!sidebarCollapsed && (
                 <span className="font-medium text-sm">{item.label}</span>
               )}
-            </button>
+            </Link>
           );
         })}
       </nav>
@@ -102,7 +93,7 @@ export function Sidebar() {
           )}
         >
           {sidebarCollapsed ? (
-            <ChevronRight className="w-5 h-5" />
+            <span className="material-symbols-outlined text-xl">keyboard_double_arrow_right</span>
           ) : (
             <>
               <span className="material-symbols-outlined text-xl">keyboard_double_arrow_left</span>
