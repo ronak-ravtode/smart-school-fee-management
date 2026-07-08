@@ -1,0 +1,35 @@
+backend/test-engine.js
+  s_f6fad58a313dea::t_8db4a87f2d1961 1-169
+backend/src/modules/ledgers/routes.ts
+  s_f6fad58a313dea::t_b4fc2b6250c1df 1-29
+backend/src/app.ts
+  s_f6fad58a313dea::t_30ecef5a18e48a 9,24
+backend/src/services/feeEngine.ts
+  s_f6fad58a313dea::t_450fc78bf844de 1-85
+backend/src/services/ledgerService.ts
+  s_f6fad58a313dea::t_4904ae27ec8db6 1-168
+backend/src/modules/ledgers/controller.ts
+  s_f6fad58a313dea::t_92845a1cf85b23 1-47
+backend/src/modules/ledgers/schemas.ts
+  s_f6fad58a313dea::t_2266a49aed06dc 1-25
+backend/package-lock.json
+  s_f6fad58a313dea::t_3dc1b3a7b3fbbb 13,584-589
+backend/package.json
+  s_f6fad58a313dea::t_bd33c4ac54f088 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "f4f59edc9de1b593a06bf11b4ed01ecd707a0320",
+  "prompts": {},
+  "sessions": {
+    "s_f6fad58a313dea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c229aafbfferCRsgt9dPqpgsM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
