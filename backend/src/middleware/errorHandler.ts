@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { AppError } from "@/lib/errors";
 import { sendError } from "@/utils/apiResponse";
 
@@ -34,6 +35,21 @@ export function errorHandler(
     res
       .status(err.statusCode)
       .json(sendError(err.code, err.message, err.details));
+    return;
+  }
+
+  // JWT errors
+  if (err instanceof JsonWebTokenError) {
+    res
+      .status(401)
+      .json(sendError("UNAUTHORIZED", "Invalid token. Please log in again."));
+    return;
+  }
+
+  if (err instanceof TokenExpiredError) {
+    res
+      .status(401)
+      .json(sendError("UNAUTHORIZED", "Token expired. Please log in again."));
     return;
   }
 

@@ -116,6 +116,11 @@ model Transaction {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
+enum Role {
+  ADMIN
+  CASHIER
+}
+
 enum LedgerStatus {
   PENDING
   PARTIAL
@@ -133,4 +138,18 @@ enum TransactionStatus {
   PENDING
   SUCCESS
   FAILED
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid()) @map("id")
+  email        String   @unique @map("email")
+  passwordHash String   @map("password_hash")
+  name         String   @map("name")
+  role         Role     @default(CASHIER) @map("role")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
 }
