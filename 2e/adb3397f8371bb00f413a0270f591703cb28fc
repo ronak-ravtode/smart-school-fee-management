@@ -1,0 +1,51 @@
+frontend/src/lib/api.ts
+  s_f6fad58a313dea::t_2015e2c7790804 1
+backend/.env.example
+  s_f6fad58a313dea::t_a24d0f2e0d0468 1-16
+frontend/src/pages/fee-types/FeeTypesPage.tsx
+  s_f6fad58a313dea::t_62181d149539ef 33,36
+  s_f6fad58a313dea::t_2fabdf0fab49a3 111-119
+  s_f6fad58a313dea::t_b725a28b06802c 4
+frontend/src/lib/receipt.ts
+  s_f6fad58a313dea::t_ca89ffc3f8fbf2 1
+backend/src/app.ts
+  s_f6fad58a313dea::t_19200c6b22bd1c 22
+DEMO_SCRIPT.md
+  s_f6fad58a313dea::t_8c5c179495f5de 21
+  s_f6fad58a313dea::t_6e3a987a0f692a 26,31,35,41,51,61,78,91,93,97,101,106-108,110,114,118,121-127
+  s_f6fad58a313dea::t_9de559b2c58e2c 1-20,22-25,27-30,32-34,36-40,42-50,52-60,62-77,79-90,92,94-96,98-100,102-105,109,111-113,115-117,119-120,128-227
+frontend/vercel.json
+  s_f6fad58a313dea::t_611dc3513b1d5f 1-5
+frontend/src/pages/fee-types/FeeStructuresPage.tsx
+  s_f6fad58a313dea::t_d6a4e4ceb7ff14 4
+  s_f6fad58a313dea::t_7e80a670c656e8 50,52
+  s_f6fad58a313dea::t_cc3f849ac7f421 116-124
+frontend/.env.example
+  s_f6fad58a313dea::t_504c173c24cea7 1-5
+backend/src/controllers/health.controller.ts
+  s_35cfabe18fc201::t_775d06d986164d 9-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "2eadb3397f8371bb00f413a0270f591703cb28fc",
+  "prompts": {},
+  "sessions": {
+    "s_35cfabe18fc201": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c21f4b3dffe1BuGnEeEeDmIO3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_f6fad58a313dea": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c229aafbfferCRsgt9dPqpgsM",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
