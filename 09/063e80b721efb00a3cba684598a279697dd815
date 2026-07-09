@@ -1,0 +1,61 @@
+backend/src/controllers/webhookController.ts
+  s_4af32dd9509b41::t_c41905f70e49ea 8-34
+  s_4af32dd9509b41::t_456045dd0828e8 2,5,35-61,90-93,96,125-127,131-133,135,137-143,145-149,151
+  s_4af32dd9509b41::t_99ddf02355a44d 6,62-89,94-95,97-124,134,136,144,153-158,162,166-167,169,171-181,183-201,203,207-210,212-219,223-279
+  s_4af32dd9509b41::t_b9be36b8109717 7
+frontend/src/lib/socket.ts
+  s_4af32dd9509b41::t_a4b1dfa562d582 1-5,7-12,18,48-57,66-71,73-79,92-98
+  s_4af32dd9509b41::t_efbfdb99bedcf8 6,13-17,19-47,58-65,72,80-91
+frontend/src/pages/Dashboard.tsx
+  s_4af32dd9509b41::t_224e20e2dc015e 1-2,17,20-21,39-41,43-55,84,86,88-89
+  s_4af32dd9509b41::t_aaf38edbf7b03b 9-14,38,42,56-83,85,87
+  s_4af32dd9509b41::t_5c7542b65306a7 90
+backend/src/index.ts
+  s_4af32dd9509b41::t_f150ff04ccf5dc 1,13-14,16,18-19,21
+  s_4af32dd9509b41::t_892cb6e5a83292 4,15,17
+backend/src/services/paymentService.ts
+  s_4af32dd9509b41::t_505b8ea14929d8 120-145,220,254-408
+  s_4af32dd9509b41::t_550d245542e7f3 1-119,146-219,221-253,409-412
+backend/src/app.ts
+  s_4af32dd9509b41::t_284934c627cfcb 29-30,33,57-69
+  s_4af32dd9509b41::t_30d4c7d632142a 17,31,34-35,53-56
+  s_35cfabe18fc201::t_3fa1709d121646 32
+backend/prisma/schema.prisma
+  s_4af32dd9509b41::t_b34380e1b57b0b 118
+  s_4af32dd9509b41::t_07c381ccb4123b 210-211
+backend/src/lib/socket.ts
+  s_4af32dd9509b41::t_eb2753695ed5a6 1-11,15-19,29-40
+  s_4af32dd9509b41::t_e898f3330509e9 12-14,20-28
+frontend/package.json
+  s_4af32dd9509b41::t_cb98f8894a22dd 26
+backend/package-lock.json
+  s_4af32dd9509b41::t_3417b1e70d4ebf 25,37,517-522,751-769,869-877,1341-1393,2883-2992,3243-3263
+backend/package.json
+  s_4af32dd9509b41::t_b291cf8e6e7f80 30,45
+frontend/package-lock.json
+  s_4af32dd9509b41::t_fc67023e6616cb 24,1482-1487,2111-2127,2150-2171,2560-2565,2943-2970,3215-3243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "09063e80b721efb00a3cba684598a279697dd815",
+  "prompts": {},
+  "sessions": {
+    "s_35cfabe18fc201": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0c21f4b3dffe1BuGnEeEeDmIO3",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_4af32dd9509b41": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b94d5fb6ffe1NjlPaZ0vmnksW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
