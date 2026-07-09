@@ -1,0 +1,79 @@
+backend/src/modules/notifications/controller.ts
+  s_4af32dd9509b41::t_518f3a0029d024 1-31
+frontend/src/store/uiStore.ts
+  s_4af32dd9509b41::t_d0de4dfd1b6ec6 6,13-14,19-27,38,45-46
+backend/src/modules/dashboard/controller.ts
+  s_4af32dd9509b41::t_552c9f65859fea 30-36
+backend/src/modules/dashboard/service.ts
+  s_4af32dd9509b41::t_22fa7ab47b0e9b 172,183
+  s_4af32dd9509b41::t_abaac33e1d5c37 250-255,271-273,299-300
+  s_4af32dd9509b41::t_538fd0472fc13e 118
+  s_4af32dd9509b41::t_c82bae06b9cbf7 315-401
+  s_4af32dd9509b41::t_7483ab57e40eeb 145
+  s_4af32dd9509b41::t_8bfb3ee9744d63 33-34
+  s_4af32dd9509b41::t_fef06db67811d7 168
+  s_4af32dd9509b41::t_977895c1ff4734 171,177-182,184
+  s_4af32dd9509b41::t_9060ef20dff66c 14-15,28-32,43-58,125-127,150-154,160,185,188-242,265-270,274-281,294-298,304-305
+  s_4af32dd9509b41::t_1360330d72dbed 256-264
+  s_4af32dd9509b41::t_da87889105a605 306
+backend/src/modules/notifications/routes.ts
+  s_4af32dd9509b41::t_7f54053be3e1e6 1-10
+frontend/src/pages/DefaulterTracker.tsx
+  s_4af32dd9509b41::t_aff7ef09c953ca 1,10-11,14,19-24,28-31,39,53,57-90,122-134,138,141-142
+  s_4af32dd9509b41::t_9720da6fc75ede 2-9,12-13,15-18,25-27,32-38,40-52,54-56,91-121,135-137,139-140,143-151
+backend/src/modules/notifications/schemas.ts
+  s_4af32dd9509b41::t_57038f1a0a3a0f 1-9
+backend/src/modules/audit/schemas.ts
+  s_4af32dd9509b41::t_2672ebf38750e1 9
+backend/src/modules/notifications/service.ts
+  s_4af32dd9509b41::t_3daed752258567 1-78
+backend/src/app.ts
+  s_4af32dd9509b41::t_c0b0b711529d2a 16
+  s_4af32dd9509b41::t_ab6e240cc6626e 45
+frontend/src/types/dashboard.ts
+  s_4af32dd9509b41::t_fdaffe79fd37c8 28-29
+  s_4af32dd9509b41::t_79fc97ec806d75 9-10
+  s_4af32dd9509b41::t_9fde670eb97a6f 23-27
+frontend/src/components/dashboard/DefaulterTable.tsx
+  s_4af32dd9509b41::t_90e7e5f99a8cdd 11
+  s_4af32dd9509b41::t_42593ac82d9327 39-46,48-54
+  s_4af32dd9509b41::t_0c4846e5d61d52 1,97-158,160-164,261,269,324,340-344
+  s_4af32dd9509b41::t_a8e8451dcdfde7 176
+  s_4af32dd9509b41::t_c6fd65a38d42d4 12-16,21,32-38,47,55-71,74-96,165-175,177-225,227,231-233,237-242,245,248-260,266-268,270-277,279-284,289-291,295-301,303-304,307-308,310,312-322,329-335
+  s_4af32dd9509b41::t_8730a6bb65d3b4 305-306,309
+frontend/src/components/dashboard/DefaulterDrawer.tsx
+  s_4af32dd9509b41::t_110aaee0d495ec 1-300
+frontend/src/pages/Dashboard.tsx
+  s_4af32dd9509b41::t_cbee9d69dd1400 6,12,70,84-85
+  s_4af32dd9509b41::t_d029069c6f7dc1 1
+frontend/src/App.tsx
+  s_4af32dd9509b41::t_4c81dd221a9c04 55
+  s_4af32dd9509b41::t_a535b513d36642 13
+frontend/src/components/layout/Sidebar.tsx
+  s_4af32dd9509b41::t_aad05be3c153d5 13
+backend/prisma/schema.prisma
+  s_4af32dd9509b41::t_89d0a9e200b52f 144-149
+  s_4af32dd9509b41::t_05901657ceaab3 87
+  s_4af32dd9509b41::t_7c10419b254d3e 208
+  s_4af32dd9509b41::t_6da2e96b62d495 12-22
+backend/src/services/ledgerService.ts
+  s_4af32dd9509b41::t_3e0baaafa55d3e 98
+backend/src/modules/dashboard/routes.ts
+  s_4af32dd9509b41::t_6bcf09ba4866f6 6,13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "a7c155e4d3e1d95b23132002a9ca53d76e2a6ad3",
+  "prompts": {},
+  "sessions": {
+    "s_4af32dd9509b41": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b94d5fb6ffe1NjlPaZ0vmnksW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
