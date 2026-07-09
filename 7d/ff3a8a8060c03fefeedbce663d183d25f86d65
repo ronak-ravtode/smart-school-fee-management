@@ -1,0 +1,82 @@
+frontend/src/pages/ledgers/GenerateLedgerPage.tsx
+  s_4af32dd9509b41::t_28d80e06c93997 82
+  s_4af32dd9509b41::t_799ab12d98dc34 81
+frontend/src/store/uiStore.ts
+  s_4af32dd9509b41::t_cf8ba0cdaa6c68 42,49-50
+  s_4af32dd9509b41::t_780a7f34f191c2 5,12-13
+frontend/src/pages/ChequeReconciliation.tsx
+  s_4af32dd9509b41::t_aceeff83488632 166
+  s_4af32dd9509b41::t_d26171f3b55783 188
+  s_4af32dd9509b41::t_cf39a2b7501d60 165
+frontend/src/index.css
+  s_4af32dd9509b41::t_70e1e903f977fb 188-198,210-217
+  s_4af32dd9509b41::t_0f58d9a62163d2 199-209
+frontend/src/pages/BulkReconciliation.tsx
+  s_4af32dd9509b41::t_5d51a5c17626e1 215
+  s_4af32dd9509b41::t_1a161ac48932ee 216
+frontend/src/components/layout/MainContent.tsx
+  h_c5a3d01edfee72 44
+frontend/src/components/layout/TopBar.tsx
+  s_4af32dd9509b41::t_79b26a1924dc9b 9,12,103
+  s_4af32dd9509b41::t_fb662c35993538 119,152
+  s_4af32dd9509b41::t_202292c8d7522c 120
+  s_efa4153d0d852a::t_2d24f0a3d123d9 92
+  s_4af32dd9509b41::t_adfcd243f83b7f 136,143,145-146
+  s_4af32dd9509b41::t_76fc009de9d40f 121-122,125,130
+  s_efa4153d0d852a::t_4813ca10f91aab 93,96-102,104-105,112,117-118
+frontend/src/components/dashboard/RevenueChart.tsx
+  s_4af32dd9509b41::t_baaaa3b2dd2ec8 90
+  s_4af32dd9509b41::t_78814c37559bf2 2,5,19,22-29,31-32,34-38,41-42,44-49,56,58-62,64-70,72-76,78,116,121,123,133-138,144,147-150,163,165,170-171,173-174,176-178,180-181
+  s_4af32dd9509b41::t_4427dbd933627f 183
+  s_4af32dd9509b41::t_c271fc90fb629f 30,33,39-40,43,57,63,71,172,175,179
+  s_4af32dd9509b41::t_1f6756a3883a82 89
+frontend/src/pages/Dashboard.tsx
+  s_4af32dd9509b41::t_17d276c8658239 100
+  s_4af32dd9509b41::t_2653ab6270ddd8 16-20,37-39,50,64,78,124-125
+  s_4af32dd9509b41::t_426a82f930ef89 97-98
+frontend/src/components/layout/Sidebar.tsx
+  s_4af32dd9509b41::t_33c59f48fbb640 130,133-134,140,142
+  s_4af32dd9509b41::t_0d70bc05aa4006 30,72,87,97,121-129,131-132,135-139,161
+  s_4af32dd9509b41::t_41e1a3a9c65819 155
+  s_4af32dd9509b41::t_5eaceeb22929ff 4,26,31,33-34,36-40,42-60,65,74-75,77,82,88-90,98-120,143,145-146,148-149,151-154,156-159
+frontend/src/components/dashboard/MetricCards.tsx
+  s_4af32dd9509b41::t_edb4fbc33bc6c0 76
+frontend/src/pages/fee-types/FeeStructuresPage.tsx
+  s_4af32dd9509b41::t_e993cec154043a 101
+  s_4af32dd9509b41::t_5d6a2a9179e4aa 100
+frontend/src/pages/DefaulterTracker.tsx
+  s_4af32dd9509b41::t_45f4d663c70f5c 43
+  s_4af32dd9509b41::t_6d88a503f725c3 42
+frontend/src/pages/fee-types/FeeTypesPage.tsx
+  s_4af32dd9509b41::t_a0498fed6e338f 96
+  s_4af32dd9509b41::t_1858b549997116 95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "7dff3a8a8060c03fefeedbce663d183d25f86d65",
+  "prompts": {},
+  "humans": {
+    "h_c5a3d01edfee72": {
+      "author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_4af32dd9509b41": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b94d5fb6ffe1NjlPaZ0vmnksW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    },
+    "s_efa4153d0d852a": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b8324632ffe27wUp1lJU0VRLD",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
