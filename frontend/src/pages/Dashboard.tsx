@@ -1,15 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { MetricCards } from "@/components/dashboard/MetricCards";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { DefaulterTable } from "@/components/dashboard/DefaulterTable";
 import { DefaulterDrawer } from "@/components/dashboard/DefaulterDrawer";
 import { useUIStore } from "@/store/uiStore";
+import {
+  connectSocket,
+  onReconnect,
+  type PaymentVerifiedEvent,
+  type RefundVerifiedEvent,
+} from "@/lib/socket";
 import { cn } from "@/lib/utils";
 import type { DashboardMetrics, DefaulterRecord, RevenueByFeeType } from "@/types/dashboard";
+import { useQuery } from "@tanstack/react-query";
 
 export function Dashboard() {
-  const { sidebarCollapsed } = useUIStore();
+  const { sidebarCollapsed, addToast } = useUIStore();
+  const queryClient = useQueryClient();
 
   const { data: metricsData, isLoading: metricsLoading } = useQuery({
     queryKey: ["dashboard-metrics"],
@@ -26,12 +35,64 @@ export function Dashboard() {
     queryFn: () => apiClient.get<RevenueByFeeType[]>("/dashboard/revenue-breakdown"),
   });
 
+  // Edge Case 2 + Step 4: Socket listeners + force-fetch on reconnect
+  useEffect(() => {
+    const socket = connectSocket();
+
+    // Real-time payment events
+    socket.on("payment_verified", (event: PaymentVerifiedEvent) => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      queryClient.invalidateQueries({ queryKey: ["defaulter-tracker"] });
+
+      addToast({
+        title: "Payment Verified",
+        description: `Rs. ${event.amount.toLocaleString("en-IN")} received from ${event.studentName ?? "student"}. Ledger status: ${event.ledgerStatus}.`,
+        variant: "success",
+      });
+    });
+
+    // Edge Case 3: Refund events
+    socket.on("refund_verified", (event: RefundVerifiedEvent) => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      queryClient.invalidateQueries({ queryKey: ["defaulter-tracker"] });
+
+      addToast({
+        title: "Refund Processed",
+        description: `Rs. ${event.refundAmount.toLocaleString("en-IN")} refunded to ${event.studentName ?? "student"}. Ledger status: ${event.ledgerStatus}.`,
+        variant: "default",
+      });
+    });
+
+    // Edge Case 2: Force-fetch all dashboard data on reconnect
+    const cleanup = onReconnect(() => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      queryClient.invalidateQueries({ queryKey: ["defaulter-tracker"] });
+
+      addToast({
+        title: "Reconnected",
+        description: "Dashboard data refreshed after reconnection.",
+        variant: "success",
+      });
+    });
+
+    return () => {
+      cleanup();
+      socket.off("payment_verified");
+      socket.off("refund_verified");
+    };
+  }, [queryClient, addToast]);
+
   return (
     <div className={cn(
       "ml-64 min-h-screen transition-all duration-300",
       sidebarCollapsed && "ml-[72px]"
     )}>
-      {/* Page Canvas */}
       <div className="pt-24 px-8 pb-8">
         {/* Header */}
         <div className="mb-8 animate-fade-slide-up">
@@ -54,7 +115,6 @@ export function Dashboard() {
 
         {/* Charts & Tables Grid */}
         <div className="grid grid-cols-12 gap-4 mt-4">
-          {/* Revenue Chart - 8 cols */}
           <div className="col-span-12 md:col-span-8">
             <RevenueChart
               data={revenueData?.data}
@@ -62,7 +122,6 @@ export function Dashboard() {
             />
           </div>
 
-          {/* Defaulters - 4 cols */}
           <div className="col-span-12 md:col-span-4">
             <DefaulterTable
               data={defaultersData?.data}
@@ -81,7 +140,6 @@ export function Dashboard() {
         </span>
       </button>
 
-      {/* Slide-over Drawer */}
       <DefaulterDrawer />
     </div>
   );

@@ -115,6 +115,7 @@ model Transaction {
   paymentMethod       PaymentMethod     @map("payment_method")
   transactionRef      String?           @map("transaction_ref")
   receiptNumber       String?           @unique @map("receipt_number")
+  gatewayPaymentId    String?           @unique @map("gateway_payment_id")
   status              TransactionStatus @default(PENDING) @map("status")
   chequeNumber        String?           @map("cheque_number")
   chequeBank          String?           @map("cheque_bank")
@@ -206,6 +207,8 @@ enum AuditAction {
   PAYMENT_REVERSED
   BULK_PAYMENT
   REMINDER_SENT
+  SUSPICIOUS_WEBHOOK_ATTEMPT
+  REFUND_PROCESSED
 }
 
 // ─── User ─────────────────────────────────────────────────────────────────────
