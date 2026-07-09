@@ -1,0 +1,66 @@
+backend/src/modules/transactions/schemas.ts
+  s_4af32dd9509b41::t_a14213397fc4b2 5-10,20
+frontend/src/components/sync/SyncManager.tsx
+  s_4af32dd9509b41::t_3625c5ca7d0dc9 4,9-12,15-19,44,55,115-135,137-141,143-144,146-147,150,191,207-208,211-251,253-278,307-312
+  s_4af32dd9509b41::t_1ed9c717ac5ef6 13-14,28-30,37,45-46,48,67-68,70-114,142,145,148,151-155,157-161,163-170,174,176,190,194,197,200,209-210,252
+  s_4af32dd9509b41::t_33c02a83a6ba93 149,156,162
+  s_4af32dd9509b41::t_0055f69b9f6de8 313
+frontend/src/store/uiStore.ts
+  s_4af32dd9509b41::t_8db288b3c53692 26-27
+frontend/src/components/dashboard/DefaulterDrawer.tsx
+  s_4af32dd9509b41::t_10b8a19dcb651e 333,342
+  s_4af32dd9509b41::t_66d6696f9adc7a 65
+  s_4af32dd9509b41::t_ac98734eaa9b83 82
+  s_4af32dd9509b41::t_d36da4317750bf 5
+  s_4af32dd9509b41::t_78f9950032ff2f 19
+  s_4af32dd9509b41::t_3ee010b1747135 110-156
+  s_4af32dd9509b41::t_7ab6a86a784ea7 28
+  s_4af32dd9509b41::t_ad71bd58220a67 85-87
+frontend/src/store/syncStore.ts
+  s_4af32dd9509b41::t_e350e1fa489ed8 106-111
+  s_4af32dd9509b41::t_e6fc34a08ec9ef 124
+  s_4af32dd9509b41::t_f08360b729abfa 6-12,23-24,30-43,54-56,66-69,79-80,133,140-162
+  s_4af32dd9509b41::t_a212157357852e 46-48,61-62,85-105,112-114,121-123,125-132
+  s_4af32dd9509b41::t_8a0af6e762ec61 25-29
+  s_4af32dd9509b41::t_56f4304e83106e 134
+backend/src/modules/transactions/controller.ts
+  s_4af32dd9509b41::t_77f8febb3e1e39 3-4,14-60,64-83,100-106,142-144,166-172
+frontend/src/components/payments/SinglePaymentModal.tsx
+  s_4af32dd9509b41::t_285fcecb2ac743 175-183,193
+  s_4af32dd9509b41::t_a2c6c0ec110a44 24-26
+  s_4af32dd9509b41::t_f453eb878cc541 40-42
+  s_4af32dd9509b41::t_ce2a2ac39194d9 16
+  s_4af32dd9509b41::t_5c90832daf4f7d 56
+  s_4af32dd9509b41::t_7dba6bc25ed2d5 423,426
+  s_4af32dd9509b41::t_34b4d321a91dae 92
+  s_4af32dd9509b41::t_d8edf633f09132 111,115-116
+frontend/src/App.tsx
+  s_4af32dd9509b41::t_2674fc9f2c6362 7
+  s_4af32dd9509b41::t_2dd2b200b2f7b1 42
+frontend/src/components/layout/TopBar.tsx
+  s_4af32dd9509b41::t_918df449382255 6,9,14,42-88,111-121
+frontend/src/components/dashboard/DefaulterTable.tsx
+  s_4af32dd9509b41::t_bb931b88070759 11,13
+  s_4af32dd9509b41::t_3bbb4ddf2b036f 169-172
+  s_4af32dd9509b41::t_267d803c2685d9 182-183
+  s_4af32dd9509b41::t_462b44d92234bb 295-298,302-303
+  s_4af32dd9509b41::t_d74ff692bff6b3 299-301
+frontend/src/components/sync/SyncConflictModal.tsx
+  s_4af32dd9509b41::t_28ad21216fe53e 1-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6cb6eb49340a9196f9c4c7d1d581bfcbaea88fd3",
+  "prompts": {},
+  "sessions": {
+    "s_4af32dd9509b41": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b94d5fb6ffe1NjlPaZ0vmnksW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
