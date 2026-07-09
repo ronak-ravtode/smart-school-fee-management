@@ -1,0 +1,46 @@
+backend/src/services/transactionService.ts
+  s_4af32dd9509b41::t_4a1e694c5133dd 12-14,23-25,69-90,175-300
+frontend/src/App.tsx
+  s_4af32dd9509b41::t_59059c88b02a29 11
+  s_4af32dd9509b41::t_fc3af52df95a18 52
+backend/src/modules/transactions/schemas.ts
+  s_4af32dd9509b41::t_a2d29e9bb2ebf2 11-22,30-41,54-57,63
+frontend/src/components/payments/SinglePaymentModal.tsx
+  s_4af32dd9509b41::t_7881cbc982276a 98-100,102
+  s_4af32dd9509b41::t_2539587234be53 402
+  s_4af32dd9509b41::t_836b515f7213e3 54-62,68-70,76,80-82
+  s_4af32dd9509b41::t_070c252120f1f7 45-47,49
+  s_4af32dd9509b41::t_9251d13cf92fba 243,247-250
+  s_4af32dd9509b41::t_cb63a02812a6ae 125-151,206-208
+  s_4af32dd9509b41::t_588397e072994e 349-389
+frontend/src/pages/ChequeReconciliation.tsx
+  s_4af32dd9509b41::t_4eecb3a2ec1897 1-236
+backend/src/services/ledgerService.ts
+  s_4af32dd9509b41::t_204fda3030a9c1 140
+frontend/src/components/layout/Sidebar.tsx
+  s_4af32dd9509b41::t_7a7c0e236b037c 19
+backend/src/modules/transactions/routes.ts
+  s_4af32dd9509b41::t_ca8511cd898376 7,13-15,38-50
+  s_4af32dd9509b41::t_ba717ced3e3052 51
+backend/src/modules/transactions/controller.ts
+  s_4af32dd9509b41::t_0ebfb405455168 9,52-84
+backend/prisma/schema.prisma
+  s_4af32dd9509b41::t_1ce7294d3236d4 144-146
+  s_4af32dd9509b41::t_70b2473f1db863 106-108
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "69b73b8a9606ceca3f38a700f7e0ea88f2fe0ffb",
+  "prompts": {},
+  "sessions": {
+    "s_4af32dd9509b41": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b94d5fb6ffe1NjlPaZ0vmnksW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
