@@ -1,0 +1,113 @@
+frontend/src/pages/ChequeReconciliation.tsx
+  s_4af32dd9509b41::t_31a8494f7ddfa9 39-40,59,67,74,83,91,95-96,101,109,115,121-122,135,145-161,165,169,183,204-210,214-215,219-222,237-238,243-246,249-251,261-263,265-303
+frontend/src/components/dashboard/RevenueChart.tsx
+  s_4af32dd9509b41::t_0da36bc9b0d75c 132
+backend/src/modules/transactions/controller.ts
+  s_4af32dd9509b41::t_b3babda2624b89 9-10,16-17,33-34,65-70,74-75,92-98
+backend/src/modules/feeStructures/routes.ts
+  s_4af32dd9509b41::t_b4286d5d45a7f1 8
+  s_4af32dd9509b41::t_8afe7cae8e6c7e 53
+backend/src/modules/transactions/schemas.ts
+  s_4af32dd9509b41::t_2f7caf7f4ec5c4 57-62,71
+backend/src/modules/students/controller.ts
+  s_4af32dd9509b41::t_d2dad02623be35 15-16,51-52,60-62
+backend/src/modules/students/service.ts
+  s_4af32dd9509b41::t_426903a42dc3c2 4,11-15,26,35-55,62,92,99,104,122,132-159,162-188
+backend/src/app.ts
+  s_4af32dd9509b41::t_4ee5130914b405 43
+  s_4af32dd9509b41::t_b3eb9426a1c1d3 15
+frontend/src/components/layout/Sidebar.tsx
+  s_4af32dd9509b41::t_c7235b913509c3 20
+backend/src/modules/feeTypes/service.ts
+  s_4af32dd9509b41::t_9b19ade61b9645 31-32,102-103,144-145
+  s_4af32dd9509b41::t_2c27fe69a14e03 11-12,14-15,52,72,84,124,128,137-141,154
+  s_4af32dd9509b41::t_812f841ed21c60 4,13,21-30,33-44,79-80,83,86,91-97,99-101,104-121,125,136,142-143,146-153,155-157
+backend/src/modules/feeStructures/schemas.ts
+  s_4af32dd9509b41::t_53506db7c7154a 26-29,36
+backend/src/modules/audit/controller.ts
+  s_4af32dd9509b41::t_045f6c77bd8e15 1-23
+frontend/src/components/dashboard/MetricCards.tsx
+  s_4af32dd9509b41::t_644fa4051e1a4b 16-19,28,40,54,66
+backend/src/modules/dashboard/service.ts
+  s_4af32dd9509b41::t_b36a9cd759fc6f 4-5,36,48,57,92,115,121,130,176,187
+frontend/src/pages/BulkReconciliation.tsx
+  s_4af32dd9509b41::t_9b1088e2187e6d 1
+backend/src/modules/feeTypes/routes.ts
+  s_4af32dd9509b41::t_72b967959cb45f 48
+  s_4af32dd9509b41::t_5e70201ecf2eac 8
+backend/src/services/ledgerService.ts
+  s_4af32dd9509b41::t_16abe3333e1410 151
+  s_4af32dd9509b41::t_10d5c29cb00ca3 39,49
+  s_4af32dd9509b41::t_c36a9d31c9cc07 168
+  s_4af32dd9509b41::t_25bf78fbea54c6 134,140,143
+  s_4af32dd9509b41::t_6855c131829fae 6-7
+  s_4af32dd9509b41::t_286596bcb0df4f 67
+backend/src/modules/feeStructures/controller.ts
+  s_4af32dd9509b41::t_18dacfcea7669f 15-16,62-64
+backend/src/modules/feeStructures/service.ts
+  s_4af32dd9509b41::t_c9c3d1dd708476 4,10-14,20,22-25,34-60,68,92-93,106,118-153
+backend/src/services/auditService.ts
+  s_4af32dd9509b41::t_2d3a70a165cc87 4-8,25-98,104-105,112-120,123-131
+  s_4af32dd9509b41::t_3b2df3ee514ec2 1-3,15-24,99-103,106-111,134-174
+  s_4af32dd9509b41::t_6d7649c0f897c0 9-14,121-122,132-133
+backend/src/modules/transactions/routes.ts
+  s_4af32dd9509b41::t_822186d84fdbf3 8,49
+backend/src/services/transactionService.ts
+  s_4af32dd9509b41::t_a2d1bacb58d436 311
+  s_4af32dd9509b41::t_5de8f457fb9e8c 335
+  s_4af32dd9509b41::t_d9315ed0473b72 16-17
+  s_4af32dd9509b41::t_85d6983fb7c527 254,261,276-295
+  s_4af32dd9509b41::t_4d44285dfb7f35 6,10-15,48-49,58-62,108-109,160-178,205-227,232-233,236,241-242,258,296,452-476,505,507-510,513,517,522,527,544-546,568-590
+  s_4af32dd9509b41::t_db5b27283a4339 94
+  s_4af32dd9509b41::t_2410b6e5ce12ca 63
+  s_4af32dd9509b41::t_4cc14b52f45f02 297
+  s_4af32dd9509b41::t_4a81c53ea2bf04 591
+backend/prisma/schema.prisma
+  s_4af32dd9509b41::t_5d4299a32cbb0a 12-21,27
+  s_4af32dd9509b41::t_188e7d7cba8b9e 87-88,102
+  s_4af32dd9509b41::t_4070549bc0e634 110-124,131
+  s_4af32dd9509b41::t_91bad693a8b7fc 34-41,46
+  s_4af32dd9509b41::t_95cad295bf34d1 185
+  s_4af32dd9509b41::t_016651f579e0d9 54-62,71
+  s_4af32dd9509b41::t_db38c8f989ce61 165-184,186-198,200-201
+  s_4af32dd9509b41::t_ea136f53a8ecad 199
+backend/src/modules/students/schemas.ts
+  s_4af32dd9509b41::t_f5388077a68239 31-34,39
+backend/src/modules/students/routes.ts
+  s_4af32dd9509b41::t_d104ba9f6b7101 48
+  s_4af32dd9509b41::t_f3d53d510fa8b2 8
+backend/src/modules/feeTypes/controller.ts
+  s_4af32dd9509b41::t_0ddbad1b358188 60,62
+  s_4af32dd9509b41::t_33e2e10e22132c 15,51,61
+  s_4af32dd9509b41::t_46e648b37b33e5 16,52
+backend/src/modules/audit/schemas.ts
+  s_4af32dd9509b41::t_dfee8e4d6b40c1 9
+  s_4af32dd9509b41::t_f0ab0c6681b9ea 1-8,10-18
+backend/src/modules/audit/routes.ts
+  s_4af32dd9509b41::t_84827ae4e7fb41 1-14
+backend/src/modules/feeTypes/schemas.ts
+  s_4af32dd9509b41::t_71f0c6d50c0186 40-43,48
+frontend/src/pages/AuditLogTable.tsx
+  s_4af32dd9509b41::t_5667f154c78787 2-31,33-37,39-40,49-72,74-90,93-95,98-149,151-155,157-158,166-216,218-256,258-356
+  s_4af32dd9509b41::t_bf1a8c31bce3e4 1,32,38,41-48,73,91-92,96-97,150,156,159-165,217,257
+frontend/src/App.tsx
+  s_4af32dd9509b41::t_26bb5297c84c19 12
+  s_4af32dd9509b41::t_d9d276a0504830 55-61
+  s_4af32dd9509b41::t_a47af9dd010097 54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6fdc2f0b164a964d5401998c6085b131b179454e",
+  "prompts": {},
+  "sessions": {
+    "s_4af32dd9509b41": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0b94d5fb6ffe1NjlPaZ0vmnksW",
+        "model": "unknown"
+      },
+      "human_author": "ronak-ravtode <ronakravtode001@gmail.com>"
+    }
+  }
+}
