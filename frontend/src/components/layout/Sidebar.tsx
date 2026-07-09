@@ -10,6 +10,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/", materialIcon: "dashboard" },
+  { label: "Defaulter Tracker", href: "/defaulter-tracker", materialIcon: "priority_high" },
   { label: "Students", href: "/students", materialIcon: "group" },
   { label: "Fee Types", href: "/fee-types", materialIcon: "payments" },
   { label: "Fee Structures", href: "/fee-structures", materialIcon: "account_tree" },

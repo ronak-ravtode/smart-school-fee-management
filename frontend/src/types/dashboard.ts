@@ -6,6 +6,8 @@ export interface DashboardMetrics {
   collectionPercentage: number;
 }
 
+export type RiskTier = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+
 export interface DefaulterRecord {
   studentId: string;
   studentName: string;
@@ -18,6 +20,13 @@ export interface DefaulterRecord {
   status: "OVERDUE" | "PARTIAL";
   ledgerCount: number;
   ledgerId: string;
+  daysOverdue?: number;
+  riskScore?: number;
+  riskTier?: RiskTier;
+  hasBouncedCheques?: boolean;
+  historicalDefaulterCount?: number;
+  studentStatus?: "ACTIVE" | "TRANSFERRED" | "ALUMNI";
+  oldestOverdueRemaining?: number;
 }
 
 export interface RevenueByFeeType {

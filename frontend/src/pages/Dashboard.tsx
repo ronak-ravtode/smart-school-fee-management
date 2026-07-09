@@ -1,18 +1,15 @@
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { MetricCards } from "@/components/dashboard/MetricCards";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
 import { DefaulterTable } from "@/components/dashboard/DefaulterTable";
-import { SinglePaymentModal } from "@/components/payments/SinglePaymentModal";
+import { DefaulterDrawer } from "@/components/dashboard/DefaulterDrawer";
 import { useUIStore } from "@/store/uiStore";
 import { cn } from "@/lib/utils";
 import type { DashboardMetrics, DefaulterRecord, RevenueByFeeType } from "@/types/dashboard";
 
 export function Dashboard() {
-  const queryClient = useQueryClient();
-  const { openModal, sidebarCollapsed } = useUIStore();
-  const [selectedDefaulter, setSelectedDefaulter] = useState<DefaulterRecord | null>(null);
+  const { sidebarCollapsed } = useUIStore();
 
   const { data: metricsData, isLoading: metricsLoading } = useQuery({
     queryKey: ["dashboard-metrics"],
@@ -28,16 +25,6 @@ export function Dashboard() {
     queryKey: ["dashboard-revenue"],
     queryFn: () => apiClient.get<RevenueByFeeType[]>("/dashboard/revenue-breakdown"),
   });
-
-  const handleRecordPayment = (record: DefaulterRecord) => {
-    setSelectedDefaulter(record);
-    openModal(`payment-${record.studentId}`);
-  };
-
-  const handleSendReminder = (studentId: string) => {
-    console.log("Send reminder to:", studentId);
-    queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
-  };
 
   return (
     <div className={cn(
@@ -80,8 +67,7 @@ export function Dashboard() {
             <DefaulterTable
               data={defaultersData?.data}
               isLoading={defaultersLoading}
-              onRecordPayment={handleRecordPayment}
-              onSendReminder={handleSendReminder}
+              compact
             />
           </div>
         </div>
@@ -95,15 +81,8 @@ export function Dashboard() {
         </span>
       </button>
 
-      {/* Payment Dialog */}
-      {selectedDefaulter && (
-        <SinglePaymentModal
-          studentId={selectedDefaulter.studentId}
-          studentName={selectedDefaulter.studentName}
-          remaining={selectedDefaulter.remaining}
-          ledgerId={selectedDefaulter.ledgerId}
-        />
-      )}
+      {/* Slide-over Drawer */}
+      <DefaulterDrawer />
     </div>
   );
 }

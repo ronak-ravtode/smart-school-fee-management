@@ -6,7 +6,7 @@ export const AuditLogQuerySchema = z.object({
   action: z.enum([
     "CREATED", "UPDATED", "DELETED", "WAIVED", "PENALTY_APPLIED",
     "CHEQUE_CLEARED", "CHEQUE_BOUNCED", "PAYMENT_RECORDED", "PAYMENT_REVERSED",
-    "BULK_PAYMENT",
+    "BULK_PAYMENT", "REMINDER_SENT",
   ]).optional(),
   entityType: z.string().optional(),
   actorName: z.string().optional(),

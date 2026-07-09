@@ -95,6 +95,7 @@ export async function generateLedgersForClass(
         waivedAmount: toPrismaDecimal(result.waiverAmount),
         paidAmount: "0.00",
         dueDate,
+        feeIssuedDate: now,
         status: "PENDING",
       });
     }

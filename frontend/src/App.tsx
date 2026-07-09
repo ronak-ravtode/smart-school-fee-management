@@ -10,6 +10,7 @@ import { Dashboard } from "@/pages/Dashboard";
 import { BulkReconciliation } from "@/pages/BulkReconciliation";
 import { ChequeReconciliation } from "@/pages/ChequeReconciliation";
 import { AuditLogTable } from "@/pages/AuditLogTable";
+import { DefaulterTracker } from "@/pages/DefaulterTracker";
 import { FeeTypesPage } from "@/pages/fee-types/FeeTypesPage";
 import { FeeStructuresPage } from "@/pages/fee-types/FeeStructuresPage";
 import { GenerateLedgerPage } from "@/pages/ledgers/GenerateLedgerPage";
@@ -51,6 +52,7 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/bulk-reconciliation" element={<BulkReconciliation />} />
                   <Route path="/cheque-reconciliation" element={<ChequeReconciliation />} />
+                  <Route path="/defaulter-tracker" element={<DefaulterTracker />} />
                   <Route
                     path="/audit-trail"
                     element={

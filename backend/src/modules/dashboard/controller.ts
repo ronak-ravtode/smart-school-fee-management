@@ -27,3 +27,10 @@ export const getRevenueBreakdown = asyncHandler(
     res.json(sendSuccess(breakdown, "Revenue breakdown fetched"));
   }
 );
+
+export const getRecoveryDefaulters = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const result = await dashboardService.getRecoveryDefaulters();
+    res.json(sendSuccess(result.data, "Recovery defaulters fetched"));
+  }
+);

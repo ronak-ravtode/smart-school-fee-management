@@ -13,6 +13,7 @@ import { transactionModuleRoutes } from "@/modules/transactions/routes";
 import { dashboardRoutes } from "@/modules/dashboard/routes";
 import { receiptModuleRoutes } from "@/modules/receipts/routes";
 import { auditModuleRoutes } from "@/modules/audit/routes";
+import { notificationModuleRoutes } from "@/modules/notifications/routes";
 import { handleUPIWebhook } from "@/controllers/webhookController";
 import { protectRoute } from "@/middleware/protectRoute";
 import { authorizeRoles } from "@/middleware/authorizeRoles";
@@ -41,6 +42,7 @@ app.use("/api/v1/fee-types", protectRoute, authorizeRoles("ADMIN"), feeTypeModul
 app.use("/api/v1/fee-structures", protectRoute, authorizeRoles("ADMIN"), feeStructureModuleRoutes);
 app.use("/api/v1/ledgers", protectRoute, authorizeRoles("ADMIN"), ledgerModuleRoutes);
 app.use("/api/v1/audit-logs", protectRoute, authorizeRoles("ADMIN"), auditModuleRoutes);
+app.use("/api/v1/notifications", protectRoute, notificationModuleRoutes);
 
 // ── Webhooks (no auth) ────────────────────────────────────────────────────────
 app.post("/api/v1/webhooks/upi", handleUPIWebhook);
