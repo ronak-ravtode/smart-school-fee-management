@@ -6,6 +6,7 @@ import {
   SinglePaymentInput,
   BulkReconcileInput,
   LedgerTransactionsParams,
+  ReconcileChequeInput,
 } from "./schemas";
 
 export const recordPayment = asyncHandler(
@@ -46,5 +47,38 @@ export const getLedgerTransactions = asyncHandler(
     const transactions =
       await transactionService.getTransactionsByLedger(ledgerId);
     res.json(sendSuccess(transactions, "Transactions fetched"));
+  }
+);
+
+export const getPendingCheques = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const cheques = await transactionService.getPendingCheques();
+    res.json(sendSuccess(cheques, "Pending cheques fetched"));
+  }
+);
+
+export const clearCheque = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { transactionId } = req.body as ReconcileChequeInput;
+    const result = await transactionService.clearCheque(transactionId);
+    res.json(
+      sendSuccess(
+        {
+          transaction: result.transaction,
+          ledger: result.ledger,
+        },
+        "Cheque cleared successfully"
+      )
+    );
+  }
+);
+
+export const bounceCheque = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { transactionId } = req.body as ReconcileChequeInput;
+    const transaction = await transactionService.bounceCheque(transactionId);
+    res.json(
+      sendSuccess(transaction, "Cheque marked as bounced")
+    );
   }
 );

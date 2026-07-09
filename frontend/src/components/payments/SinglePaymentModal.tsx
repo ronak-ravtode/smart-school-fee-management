@@ -42,25 +42,44 @@ export function SinglePaymentModal({
   const [amount, setAmount] = useState(remaining.toString());
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [transactionRef, setTransactionRef] = useState("");
+  const [chequeNumber, setChequeNumber] = useState("");
+  const [chequeBank, setChequeBank] = useState("");
+  const [chequeIssueDate, setChequeIssueDate] = useState("");
   const [lastTransactionId, setLastTransactionId] = useState<string | null>(null);
+  const [lastWasCheque, setLastWasCheque] = useState(false);
 
   const isOpen = activeModal === `payment-${studentId}`;
 
   const mutation = useMutation({
-    mutationFn: async (data: { ledgerId: string; amount: number; paymentMethod: PaymentMethod; transactionRef?: string }) => {
+    mutationFn: async (data: {
+      ledgerId: string;
+      amount: number;
+      paymentMethod: PaymentMethod;
+      transactionRef?: string;
+      chequeNumber?: string;
+      chequeBank?: string;
+      chequeIssueDate?: string;
+    }) => {
       return apiClient.post<{ transaction: { id: string } }>("/transactions/pay", {
         ledgerId: data.ledgerId,
         amount: data.amount,
         paymentMethod: data.paymentMethod,
         transactionRef: data.transactionRef || undefined,
+        chequeNumber: data.chequeNumber || undefined,
+        chequeBank: data.chequeBank || undefined,
+        chequeIssueDate: data.chequeIssueDate || undefined,
       });
     },
     onSuccess: (response) => {
       const txnId = response.data.transaction.id;
       setLastTransactionId(txnId);
+      setLastWasCheque(paymentMethod === "CHEQUE");
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      if (paymentMethod === "CHEQUE") {
+        queryClient.invalidateQueries({ queryKey: ["pending-cheques"] });
+      }
     },
     onError: () => {
       addToast({
@@ -76,7 +95,11 @@ export function SinglePaymentModal({
     setAmount(remaining.toString());
     setPaymentMethod("CASH");
     setTransactionRef("");
+    setChequeNumber("");
+    setChequeBank("");
+    setChequeIssueDate("");
     setLastTransactionId(null);
+    setLastWasCheque(false);
   };
 
   const handleSubmit = async () => {
@@ -97,6 +120,33 @@ export function SinglePaymentModal({
         variant: "error",
       });
       return;
+    }
+
+    if (paymentMethod === "CHEQUE") {
+      if (!chequeNumber.trim()) {
+        addToast({
+          title: "Cheque number required",
+          description: "Please enter the cheque number.",
+          variant: "error",
+        });
+        return;
+      }
+      if (!chequeBank.trim()) {
+        addToast({
+          title: "Bank name required",
+          description: "Please enter the bank name.",
+          variant: "error",
+        });
+        return;
+      }
+      if (!chequeIssueDate) {
+        addToast({
+          title: "Issue date required",
+          description: "Please select the cheque issue date.",
+          variant: "error",
+        });
+        return;
+      }
     }
 
     const resolvedLedgerId = ledgerId;
@@ -153,6 +203,9 @@ export function SinglePaymentModal({
       amount: parsedAmount,
       paymentMethod,
       transactionRef: transactionRef || undefined,
+      chequeNumber: paymentMethod === "CHEQUE" ? chequeNumber.trim() : undefined,
+      chequeBank: paymentMethod === "CHEQUE" ? chequeBank.trim() : undefined,
+      chequeIssueDate: paymentMethod === "CHEQUE" ? chequeIssueDate : undefined,
     });
   };
 
@@ -187,11 +240,14 @@ export function SinglePaymentModal({
                 </div>
               </div>
               <DialogTitle className="text-center text-on-surface" style={{ fontFamily: "Crimson Text" }}>
-                Payment Recorded
+                {lastWasCheque ? "Cheque Recorded" : "Payment Recorded"}
               </DialogTitle>
               <DialogDescription className="text-center text-on-surface-variant text-sm">
                 Rs. {parseFloat(amount).toLocaleString("en-IN")} payment for{" "}
-                <span className="font-semibold text-on-surface">{studentName}</span> recorded successfully.
+                <span className="font-semibold text-on-surface">{studentName}</span>{" "}
+                {lastWasCheque
+                  ? "recorded as pending clearance. The student's balance will not update until the cheque clears."
+                  : "recorded successfully."}
               </DialogDescription>
             </DialogHeader>
 
@@ -290,6 +346,47 @@ export function SinglePaymentModal({
                   />
                 </div>
               )}
+
+              {/* Cheque Details (required for CHEQUE) */}
+              {paymentMethod === "CHEQUE" && (
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5 block">
+                      Cheque Number *
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Cheque number"
+                      value={chequeNumber}
+                      onChange={(e) => setChequeNumber(e.target.value)}
+                      className="bg-white border-outline-variant"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5 block">
+                      Bank Name *
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Bank name"
+                      value={chequeBank}
+                      onChange={(e) => setChequeBank(e.target.value)}
+                      className="bg-white border-outline-variant"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5 block">
+                      Cheque Issue Date *
+                    </label>
+                    <Input
+                      type="date"
+                      value={chequeIssueDate}
+                      onChange={(e) => setChequeIssueDate(e.target.value)}
+                      className="bg-white border-outline-variant"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <DialogFooter className="gap-2">
@@ -302,7 +399,7 @@ export function SinglePaymentModal({
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!amount || parseFloat(amount) <= 0 || mutation.isPending || (paymentMethod === "UPI" && !transactionRef)}
+                disabled={!amount || parseFloat(amount) <= 0 || mutation.isPending || (paymentMethod === "UPI" && !transactionRef) || (paymentMethod === "CHEQUE" && (!chequeNumber.trim() || !chequeBank.trim() || !chequeIssueDate))}
                 className="bg-primary text-white hover:bg-primary/90"
               >
                 {mutation.isPending ? (

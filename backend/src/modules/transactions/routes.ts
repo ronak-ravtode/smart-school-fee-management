@@ -4,11 +4,15 @@ import {
   SinglePaymentSchema,
   BulkReconcileSchema,
   LedgerTransactionsParamsSchema,
+  ReconcileChequeSchema,
 } from "./schemas";
 import {
   recordPayment,
   bulkReconcile,
   getLedgerTransactions,
+  getPendingCheques,
+  clearCheque,
+  bounceCheque,
 } from "./controller";
 
 const router = Router();
@@ -29,6 +33,20 @@ router.get(
   "/ledger/:ledgerId",
   validate(LedgerTransactionsParamsSchema, "params"),
   getLedgerTransactions
+);
+
+router.get("/pending-cheques", getPendingCheques);
+
+router.post(
+  "/clear-cheque",
+  validate(ReconcileChequeSchema, "body"),
+  clearCheque
+);
+
+router.post(
+  "/bounce-cheque",
+  validate(ReconcileChequeSchema, "body"),
+  bounceCheque
 );
 
 export { router as transactionModuleRoutes };

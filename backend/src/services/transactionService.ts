@@ -9,6 +9,9 @@ export interface SinglePaymentInput {
   paymentMethod: "UPI" | "CASH" | "CHEQUE";
   transactionRef?: string;
   receiptNumber?: string;
+  chequeNumber?: string;
+  chequeBank?: string;
+  chequeIssueDate?: string;
 }
 
 export interface BulkPaymentItem {
@@ -17,6 +20,9 @@ export interface BulkPaymentItem {
   paymentMethod: "UPI" | "CASH" | "CHEQUE";
   transactionRef?: string;
   receiptNumber?: string;
+  chequeNumber?: string;
+  chequeBank?: string;
+  chequeIssueDate?: string;
 }
 
 export interface PaymentResult {
@@ -58,6 +64,28 @@ async function validateAndRecordPayment(
     throw new ValidationError(
       `Payment amount ${amount.toString()} exceeds remaining balance ${remainingBalance.toString()}`
     );
+  }
+
+  if (input.paymentMethod === "CHEQUE") {
+    if (!input.chequeNumber || !input.chequeBank || !input.chequeIssueDate) {
+      throw new ValidationError("Cheque number, bank name, and issue date are required for cheque payments");
+    }
+
+    const transaction = await tx.transaction.create({
+      data: {
+        ledgerId: input.ledgerId,
+        amount: amount.toDecimalPlaces(2).toString(),
+        paymentMethod: "CHEQUE",
+        transactionRef: input.transactionRef ?? null,
+        receiptNumber: input.receiptNumber ?? null,
+        status: "PENDING_CLEARANCE",
+        chequeNumber: input.chequeNumber,
+        chequeBank: input.chequeBank,
+        chequeIssueDate: new Date(input.chequeIssueDate),
+      },
+    });
+
+    return { transaction, ledger };
   }
 
   const newPaidAmount = paidAmount.plus(amount);
@@ -142,5 +170,131 @@ export async function getTransactionsByLedger(ledgerId: string) {
   return prisma.transaction.findMany({
     where: { ledgerId },
     orderBy: { createdAt: "desc" },
+  });
+}
+
+// ─── Cheque Reconciliation ───────────────────────────────────────────────────
+
+export interface PendingChequeRecord {
+  transactionId: string;
+  ledgerId: string;
+  studentId: string;
+  studentName: string;
+  studentClass: string;
+  studentSection: string;
+  chequeNumber: string;
+  chequeBank: string;
+  chequeIssueDate: Date;
+  amount: number;
+  dateReceived: Date;
+  daysWaiting: number;
+}
+
+export async function getPendingCheques(): Promise<PendingChequeRecord[]> {
+  const transactions = await prisma.transaction.findMany({
+    where: { status: "PENDING_CLEARANCE" },
+    include: {
+      ledger: {
+        include: {
+          student: true,
+        },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  const now = new Date();
+
+  return transactions.map((txn) => {
+    const daysWaiting = Math.floor(
+      (now.getTime() - txn.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    return {
+      transactionId: txn.id,
+      ledgerId: txn.ledgerId,
+      studentId: txn.ledger.studentId,
+      studentName: txn.ledger.student.name,
+      studentClass: txn.ledger.student.class,
+      studentSection: txn.ledger.student.section,
+      chequeNumber: txn.chequeNumber!,
+      chequeBank: txn.chequeBank!,
+      chequeIssueDate: txn.chequeIssueDate!,
+      amount: Number(txn.amount),
+      dateReceived: txn.createdAt,
+      daysWaiting,
+    };
+  });
+}
+
+export async function clearCheque(
+  transactionId: string
+): Promise<{ transaction: Transaction; ledger: StudentFeeLedger }> {
+  return prisma.$transaction(async (tx) => {
+    const transaction = await tx.transaction.findUnique({
+      where: { id: transactionId },
+    });
+
+    if (!transaction) {
+      throw new NotFoundError("Transaction", transactionId);
+    }
+
+    if (transaction.status !== "PENDING_CLEARANCE") {
+      throw new ConflictError(
+        `Transaction ${transactionId} is not in PENDING_CLEARANCE status (current: ${transaction.status})`
+      );
+    }
+
+    const updatedTransaction = await tx.transaction.update({
+      where: { id: transactionId },
+      data: { status: "CLEARED" },
+    });
+
+    const ledger = await tx.studentFeeLedger.findUnique({
+      where: { id: transaction.ledgerId },
+    });
+    if (!ledger) {
+      throw new NotFoundError("Ledger", transaction.ledgerId);
+    }
+
+    const paidAmount = new Decimal(ledger.paidAmount.toString());
+    const totalAmount = new Decimal(ledger.totalAmount.toString());
+    const waivedAmount = new Decimal(ledger.waivedAmount.toString());
+    const newPaidAmount = paidAmount.plus(new Decimal(transaction.amount.toString()));
+    const totalDue = totalAmount.minus(waivedAmount);
+    const newStatus = determineLedgerStatus(newPaidAmount, totalDue);
+
+    const updatedLedger = await tx.studentFeeLedger.update({
+      where: { id: transaction.ledgerId },
+      data: {
+        paidAmount: newPaidAmount.toDecimalPlaces(2).toString(),
+        status: newStatus,
+      },
+    });
+
+    return { transaction: updatedTransaction, ledger: updatedLedger };
+  });
+}
+
+export async function bounceCheque(
+  transactionId: string
+): Promise<Transaction> {
+  const transaction = await prisma.transaction.findUnique({
+    where: { id: transactionId },
+  });
+
+  if (!transaction) {
+    throw new NotFoundError("Transaction", transactionId);
+  }
+
+  if (transaction.status !== "PENDING_CLEARANCE") {
+    throw new ConflictError(
+      `Transaction ${transactionId} is not in PENDING_CLEARANCE status (current: ${transaction.status})`
+    );
+  }
+
+  return prisma.transaction.update({
+    where: { id: transactionId },
+    data: { status: "BOUNCED" },
   });
 }

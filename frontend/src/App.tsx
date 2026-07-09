@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Login } from "@/pages/Login";
 import { Dashboard } from "@/pages/Dashboard";
 import { BulkReconciliation } from "@/pages/BulkReconciliation";
+import { ChequeReconciliation } from "@/pages/ChequeReconciliation";
 import { FeeTypesPage } from "@/pages/fee-types/FeeTypesPage";
 import { FeeStructuresPage } from "@/pages/fee-types/FeeStructuresPage";
 import { GenerateLedgerPage } from "@/pages/ledgers/GenerateLedgerPage";
@@ -48,6 +49,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/bulk-reconciliation" element={<BulkReconciliation />} />
+                  <Route path="/cheque-reconciliation" element={<ChequeReconciliation />} />
                   <Route
                     path="/fee-types"
                     element={

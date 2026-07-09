@@ -137,7 +137,7 @@ export async function getLedgersByStudent(studentId: string) {
     where: { studentId },
     include: {
       feeStructure: { include: { feeType: true } },
-      transactions: { where: { status: "SUCCESS" } },
+      transactions: { where: { status: { in: ["SUCCESS", "CLEARED"] } } },
     },
     orderBy: { dueDate: "desc" },
   });

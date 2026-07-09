@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { label: "Generate Ledgers", href: "/ledgers/generate", materialIcon: "receipt_long" },
   { label: "Transactions", href: "/transactions", materialIcon: "receipt_long" },
   { label: "Bulk Reconcile", href: "/bulk-reconciliation", materialIcon: "receipt_long" },
+  { label: "Cheque Reconciliation", href: "/cheque-reconciliation", materialIcon: "account_balance" },
   { label: "Settings", href: "/settings", materialIcon: "settings" },
 ];
 

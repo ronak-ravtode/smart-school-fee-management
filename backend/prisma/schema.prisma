@@ -103,6 +103,9 @@ model Transaction {
   transactionRef String?           @map("transaction_ref")
   receiptNumber  String?           @unique @map("receipt_number")
   status         TransactionStatus @default(PENDING) @map("status")
+  chequeNumber   String?           @map("cheque_number")
+  chequeBank     String?           @map("cheque_bank")
+  chequeIssueDate DateTime?        @map("cheque_issue_date")
   createdAt      DateTime          @default(now()) @map("created_at")
   updatedAt      DateTime          @updatedAt @map("updated_at")
 
@@ -138,6 +141,9 @@ enum TransactionStatus {
   PENDING
   SUCCESS
   FAILED
+  PENDING_CLEARANCE
+  CLEARED
+  BOUNCED
 }
 
 // ─── User ─────────────────────────────────────────────────────────────────────
