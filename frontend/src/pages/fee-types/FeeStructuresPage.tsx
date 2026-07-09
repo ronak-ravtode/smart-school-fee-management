@@ -97,8 +97,8 @@ export function FeeStructuresPage() {
   });
 
   return (
-    <div className={cn("ml-64 min-h-screen transition-all duration-300", sidebarCollapsed && "ml-[72px]")}>
-      <div className="pt-24 px-8 pb-8">
+    <div className={cn("xl:ml-60 ml-0 min-h-screen transition-all duration-300", sidebarCollapsed && "xl:ml-[72px] ml-0")}>
+      <div className="pt-20 md:pt-24 lg:pt-28 px-3 md:px-5 lg:px-8 pb-8">
         {/* Header */}
         <div className="mb-8 animate-fade-slide-up">
           <div className="flex items-center justify-between">

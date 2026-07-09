@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useUIStore } from "@/store/uiStore";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -22,91 +23,141 @@ const navItems: NavItem[] = [
   { label: "Settings", href: "/settings", materialIcon: "settings" },
 ];
 
-export function Sidebar() {
-  const { sidebarCollapsed, toggleSidebar } = useUIStore();
+function SidebarContent({ collapsed, onNavClick, isMobile }: { collapsed: boolean; onNavClick?: () => void; isMobile?: boolean }) {
   const location = useLocation();
 
   return (
-    <aside
-      className={cn(
-        "bg-stone-900 h-screen fixed left-0 top-0 flex flex-col py-6 z-50 transition-all duration-300",
-        sidebarCollapsed ? "w-[72px]" : "w-64"
-      )}
-    >
-      {/* Logo */}
+    <>
+      {/* Logo + Close button */}
       <div className={cn(
-        "mb-10 flex items-center",
-        sidebarCollapsed ? "justify-center px-2" : "gap-3 px-6"
+        "mb-6 flex items-center",
+        collapsed ? "justify-center px-2" : "justify-between px-5"
       )}>
-        <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-          <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>
-            school
-          </span>
-        </div>
-        {!sidebarCollapsed && (
-          <div>
-            <h1 className="text-xl font-bold text-white leading-tight" style={{ fontFamily: "Crimson Text" }}>
-              SmartSchool
-            </h1>
-            <p className="text-[10px] tracking-widest text-primary font-bold opacity-80 uppercase">
-              Fee Management
-            </p>
+        <div className={cn("flex items-center", collapsed ? "" : "gap-3")}>
+          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="material-symbols-outlined text-white text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              school
+            </span>
           </div>
+          {!collapsed && (
+            <div>
+              <h1 className="text-lg font-bold text-white leading-tight" style={{ fontFamily: "Crimson Text" }}>
+                SmartSchool
+              </h1>
+              <p className="text-[9px] tracking-widest text-primary font-bold opacity-80 uppercase">
+                Fee Management
+              </p>
+            </div>
+          )}
+        </div>
+        {/* Close button - mobile only */}
+        {isMobile && (
+          <button
+            onClick={onNavClick}
+            className="p-2 rounded-lg text-stone-400 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 overflow-y-auto scrollbar-hide px-2 space-y-0.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href;
           return (
             <Link
               key={item.href}
               to={item.href}
+              onClick={onNavClick}
               className={cn(
-                "flex items-center gap-3 w-full text-left transition-all duration-200",
-                sidebarCollapsed ? "justify-center px-2 py-3 mx-0 rounded-lg" : "px-4 py-3 mx-2 rounded-lg",
+                "flex items-center gap-3 w-full text-left transition-all duration-150 rounded-lg",
+                collapsed ? "justify-center px-2 py-3" : "px-3 py-2.5",
                 isActive
-                  ? "sidebar-nav-item active"
+                  ? "bg-primary/15 text-primary"
                   : "text-stone-400 hover:text-white hover:bg-white/5"
               )}
             >
               <span className={cn(
-                "material-symbols-outlined text-xl",
+                "material-symbols-outlined text-[20px] flex-shrink-0",
                 isActive && "text-primary"
               )}>
                 {item.materialIcon}
               </span>
-              {!sidebarCollapsed && (
-                <span className="font-medium text-sm">{item.label}</span>
+              {!collapsed && (
+                <span className={cn("text-[13px] font-medium truncate", isActive && "font-semibold")}>
+                  {item.label}
+                </span>
               )}
             </Link>
           );
         })}
       </nav>
 
-      {/* Collapse Button */}
+      {/* Collapse Button (desktop only) */}
+      {!isMobile && (
+        <div className={cn(
+          "mt-auto pt-4 border-t border-white/5",
+          collapsed ? "px-2" : "px-3"
+        )}>
+          <button
+            onClick={useUIStore.getState().toggleSidebar}
+            className={cn(
+              "flex items-center gap-3 w-full rounded-lg text-stone-400 hover:text-white hover:bg-white/5 transition-all duration-150",
+              collapsed ? "justify-center px-2 py-2.5" : "px-3 py-2.5"
+            )}
+          >
+            {collapsed ? (
+              <span className="material-symbols-outlined text-[20px]">keyboard_double_arrow_right</span>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-[20px]">keyboard_double_arrow_left</span>
+                <span className="text-[13px] font-medium">Collapse</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
+
+export function Sidebar() {
+  const { sidebarCollapsed, sidebarOpen, closeMobileSidebar } = useUIStore();
+
+  return (
+    <>
+      {/* Desktop sidebar - visible on xl+ only */}
+      <aside
+        className={cn(
+          "bg-stone-900 h-screen fixed left-0 top-0 flex-col py-4 z-50 transition-all duration-300 hidden xl:flex",
+          sidebarCollapsed ? "w-[72px]" : "w-60"
+        )}
+      >
+        <SidebarContent collapsed={sidebarCollapsed} />
+      </aside>
+
+      {/* Mobile/Tablet sidebar */}
       <div className={cn(
-        "mt-auto pt-6 border-t border-white/5",
-        sidebarCollapsed ? "px-2" : "px-4"
+        "fixed inset-0 z-50 xl:hidden transition-all duration-300",
+        sidebarOpen ? "visible" : "invisible pointer-events-none"
       )}>
-        <button
-          onClick={toggleSidebar}
+        {/* Backdrop */}
+        <div
           className={cn(
-            "flex items-center gap-3 w-full rounded-lg text-stone-400 hover:text-white hover:bg-white/5 transition-all duration-200",
-            sidebarCollapsed ? "justify-center px-2 py-3" : "px-4 py-3 mx-0"
+            "absolute inset-0 bg-black/50 transition-opacity duration-300",
+            sidebarOpen ? "opacity-100" : "opacity-0"
           )}
-        >
-          {sidebarCollapsed ? (
-            <span className="material-symbols-outlined text-xl">keyboard_double_arrow_right</span>
-          ) : (
-            <>
-              <span className="material-symbols-outlined text-xl">keyboard_double_arrow_left</span>
-              <span className="font-medium text-sm">Collapse</span>
-            </>
-          )}
-        </button>
+          onClick={closeMobileSidebar}
+        />
+        {/* Sidebar panel */}
+        <aside className={cn(
+          "absolute left-0 top-0 h-full w-56 bg-stone-900 flex flex-col py-4 shadow-2xl transition-transform duration-300 ease-out",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <SidebarContent collapsed={false} onNavClick={closeMobileSidebar} isMobile />
+        </aside>
       </div>
-    </aside>
+    </>
   );
 }

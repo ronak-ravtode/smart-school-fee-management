@@ -34,3 +34,10 @@ export const getRecoveryDefaulters = asyncHandler(
     res.json(sendSuccess(result.data, "Recovery defaulters fetched"));
   }
 );
+
+export const getRevenueTimeline = asyncHandler(
+  async (_req: Request, res: Response) => {
+    const timeline = await dashboardService.getRevenueTimeline();
+    res.json(sendSuccess(timeline, "Revenue timeline fetched"));
+  }
+);

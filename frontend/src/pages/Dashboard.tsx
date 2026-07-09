@@ -13,7 +13,11 @@ import {
   type RefundVerifiedEvent,
 } from "@/lib/socket";
 import { cn } from "@/lib/utils";
-import type { DashboardMetrics, DefaulterRecord, RevenueByFeeType } from "@/types/dashboard";
+import type {
+  DashboardMetrics,
+  DefaulterRecord,
+  RevenueTimelinePoint,
+} from "@/types/dashboard";
 import { useQuery } from "@tanstack/react-query";
 
 export function Dashboard() {
@@ -30,9 +34,9 @@ export function Dashboard() {
     queryFn: () => apiClient.get<DefaulterRecord[]>("/dashboard/defaults?limit=10"),
   });
 
-  const { data: revenueData, isLoading: revenueLoading } = useQuery({
-    queryKey: ["dashboard-revenue"],
-    queryFn: () => apiClient.get<RevenueByFeeType[]>("/dashboard/revenue-breakdown"),
+  const { data: timelineData, isLoading: timelineLoading } = useQuery({
+    queryKey: ["dashboard-revenue-timeline"],
+    queryFn: () => apiClient.get<RevenueTimelinePoint[]>("/dashboard/revenue-timeline"),
   });
 
   // Edge Case 2 + Step 4: Socket listeners + force-fetch on reconnect
@@ -43,7 +47,7 @@ export function Dashboard() {
     socket.on("payment_verified", (event: PaymentVerifiedEvent) => {
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue-timeline"] });
       queryClient.invalidateQueries({ queryKey: ["defaulter-tracker"] });
 
       addToast({
@@ -57,7 +61,7 @@ export function Dashboard() {
     socket.on("refund_verified", (event: RefundVerifiedEvent) => {
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue-timeline"] });
       queryClient.invalidateQueries({ queryKey: ["defaulter-tracker"] });
 
       addToast({
@@ -71,7 +75,7 @@ export function Dashboard() {
     const cleanup = onReconnect(() => {
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-defaulters"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-revenue-timeline"] });
       queryClient.invalidateQueries({ queryKey: ["defaulter-tracker"] });
 
       addToast({
@@ -90,10 +94,10 @@ export function Dashboard() {
 
   return (
     <div className={cn(
-      "ml-64 min-h-screen transition-all duration-300",
-      sidebarCollapsed && "ml-[72px]"
+      "xl:ml-60 ml-0 min-h-screen transition-all duration-300",
+      sidebarCollapsed && "xl:ml-[72px] ml-0"
     )}>
-      <div className="pt-24 px-8 pb-8">
+      <div className="pt-20 md:pt-24 lg:pt-28 px-3 md:px-5 lg:px-8 pb-8">
         {/* Header */}
         <div className="mb-8 animate-fade-slide-up">
           <div className="flex items-center gap-2 mb-1">
@@ -117,8 +121,8 @@ export function Dashboard() {
         <div className="grid grid-cols-12 gap-4 mt-4">
           <div className="col-span-12 md:col-span-8">
             <RevenueChart
-              data={revenueData?.data}
-              isLoading={revenueLoading}
+              data={timelineData?.data}
+              isLoading={timelineLoading}
             />
           </div>
 

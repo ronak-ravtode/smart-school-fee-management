@@ -34,3 +34,11 @@ export interface RevenueByFeeType {
   totalAmount: number;
   ledgerCount: number;
 }
+
+export interface RevenueTimelinePoint {
+  month: string;
+  label: string;
+  collected: number;
+  projected: boolean;
+  seasonalityMultiplier: number;
+}

@@ -73,7 +73,7 @@ const cards = [
 
 export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
       {cards.map((card) => {
         const value = metrics ? card.getValue(metrics) : 0;
         const footer = card.footer(metrics);

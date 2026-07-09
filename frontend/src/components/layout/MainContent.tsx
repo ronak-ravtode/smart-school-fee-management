@@ -41,7 +41,7 @@ export function MainContent() {
   return (
     <main
       className={cn(
-        "pt-16 min-h-screen transition-all duration-300",
+        "pt-20 lg:pt-24 min-h-screen transition-all duration-300",
         sidebarCollapsed ? "pl-[72px]" : "pl-[260px]"
       )}
     >

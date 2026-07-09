@@ -2,12 +2,15 @@ import { create } from "zustand";
 
 interface UIState {
   sidebarCollapsed: boolean;
+  sidebarOpen: boolean;
   activeModal: string | null;
   activeDrawer: DrawerState | null;
   toasts: Toast[];
 
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  openMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
   openModal: (modalId: string) => void;
   closeModal: () => void;
   openDrawer: (drawer: DrawerState) => void;
@@ -36,12 +39,15 @@ interface Toast {
 
 export const useUIStore = create<UIState>((set) => ({
   sidebarCollapsed: false,
+  sidebarOpen: false,
   activeModal: null,
   activeDrawer: null,
   toasts: [],
 
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+  openMobileSidebar: () => set({ sidebarOpen: true }),
+  closeMobileSidebar: () => set({ sidebarOpen: false }),
   openModal: (modalId) => set({ activeModal: modalId }),
   closeModal: () => set({ activeModal: null }),
   openDrawer: (drawer) => set({ activeDrawer: drawer }),

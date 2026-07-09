@@ -437,3 +437,82 @@ export async function getRevenueBreakdown(): Promise<RevenueByFeeType[]> {
     }))
     .sort((a, b) => b.totalAmount - a.totalAmount);
 }
+
+// ─── Revenue Timeline with Seasonality ───────────────────────────────────────
+
+export interface RevenueTimelinePoint {
+  month: string;
+  label: string;
+  collected: number;
+  projected: boolean;
+  seasonalityMultiplier: number;
+}
+
+// School fee seasonality: April (new academic year) brings 80% of revenue
+const MONTH_MULTIPLIERS: Record<number, number> = {
+  1: 0.5,   // January
+  2: 0.7,   // February
+  3: 0.9,   // March (end of FY)
+  4: 2.5,   // April (new academic year — peak)
+  5: 2.0,   // May
+  6: 1.5,   // June
+  7: 1.2,   // July
+  8: 1.0,   // August
+  9: 1.0,   // September
+  10: 0.8,  // October
+  11: 0.6,  // November
+  12: 0.2,  // December (holiday season — trough)
+};
+
+export async function getRevenueTimeline(): Promise<RevenueTimelinePoint[]> {
+  const now = new Date();
+  const months: RevenueTimelinePoint[] = [];
+
+  // Collect last 6 months of actual data
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+
+    const result = await prisma.studentFeeLedger.aggregate({
+      where: {
+        ...SOFT_DELETE_WHERE,
+        createdAt: { gte: startDate, lte: endDate },
+      },
+      _sum: { paidAmount: true },
+    });
+
+    const label = d.toLocaleString("en-IN", { month: "short", year: "2-digit" });
+    months.push({
+      month: `${year}-${String(month + 1).padStart(2, "0")}`,
+      label,
+      collected: Number(result._sum.paidAmount ?? 0),
+      projected: false,
+      seasonalityMultiplier: 1,
+    });
+  }
+
+  // 3-month moving average for projection
+  const lastThree = months.slice(-3);
+  const avg = lastThree.reduce((sum, m) => sum + m.collected, 0) / 3;
+
+  // Project next 2 months with seasonality adjustment
+  for (let i = 1; i <= 2; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const projectedMonth = d.getMonth() + 1; // 1-indexed
+    const multiplier = MONTH_MULTIPLIERS[projectedMonth] ?? 1;
+    const label = d.toLocaleString("en-IN", { month: "short", year: "2-digit" });
+
+    months.push({
+      month: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+      label,
+      collected: Math.round(avg * multiplier),
+      projected: true,
+      seasonalityMultiplier: multiplier,
+    });
+  }
+
+  return months;
+}
