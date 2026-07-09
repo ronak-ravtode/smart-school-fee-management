@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { SyncManager } from "@/components/sync/SyncManager";
+import { SyncConflictModal } from "@/components/sync/SyncConflictModal";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Login } from "@/pages/Login";
 import { Dashboard } from "@/pages/Dashboard";
@@ -38,6 +39,7 @@ function App() {
   return (
     <BrowserRouter>
       <SyncManager />
+      <SyncConflictModal />
       <OfflineBanner />
       <div className={`min-h-screen ${bannerOffset} transition-all duration-300`}>
         <Routes>

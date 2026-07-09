@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUIStore } from "@/store/uiStore";
 import { useAuthStore } from "@/store/authStore";
+import { useSyncStore } from "@/store/syncStore";
 import { apiClient } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { LogOut, User, Shield } from "lucide-react";
+import { LogOut, User, Shield, CheckCircle, Loader2, AlertCircle, CloudOff } from "lucide-react";
 
 export function TopBar() {
   const { sidebarCollapsed } = useUIStore();
   const { user, logout } = useAuthStore();
+  const { isOnline, pendingQueue, isSyncing, activeConflict } = useSyncStore();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,6 +39,53 @@ export function TopBar() {
     navigate("/login", { replace: true });
   };
 
+  const queueCount = pendingQueue.length;
+  const hasConflicts = !!activeConflict;
+
+  // Step 4: Sync status indicator
+  const getSyncStatus = () => {
+    if (hasConflicts) {
+      return {
+        icon: <AlertCircle className="w-4 h-4" />,
+        label: `${queueCount} action(s) need attention`,
+        bgClass: "bg-red-50 border-red-200 text-red-700",
+        pulse: false,
+      };
+    }
+    if (isSyncing) {
+      return {
+        icon: <Loader2 className="w-4 h-4 animate-spin" />,
+        label: `Syncing ${queueCount} action(s)...`,
+        bgClass: "bg-amber-50 border-amber-200 text-amber-700",
+        pulse: false,
+      };
+    }
+    if (!isOnline) {
+      return {
+        icon: <CloudOff className="w-4 h-4" />,
+        label: `${queueCount} pending`,
+        bgClass: "bg-stone-100 border-stone-300 text-stone-600",
+        pulse: queueCount > 0,
+      };
+    }
+    if (queueCount > 0) {
+      return {
+        icon: <Loader2 className="w-4 h-4 animate-spin" />,
+        label: `${queueCount} pending`,
+        bgClass: "bg-amber-50 border-amber-200 text-amber-700",
+        pulse: false,
+      };
+    }
+    return {
+      icon: <CheckCircle className="w-4 h-4" />,
+      label: "All synced",
+      bgClass: "bg-green-50 border-green-200 text-green-700",
+      pulse: false,
+    };
+  };
+
+  const syncStatus = getSyncStatus();
+
   return (
     <header
       className={cn(
@@ -59,6 +108,17 @@ export function TopBar() {
 
       {/* Actions */}
       <div className="flex items-center gap-4">
+        {/* Step 4: Sync Status Indicator */}
+        <div
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-default",
+            syncStatus.bgClass
+          )}
+        >
+          {syncStatus.icon}
+          <span>{syncStatus.label}</span>
+        </div>
+
         {/* Notifications */}
         <button className="relative hover:bg-stone-100 p-2 rounded-full transition-all">
           <span className="material-symbols-outlined text-on-surface-variant">notifications</span>

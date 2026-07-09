@@ -23,6 +23,8 @@ export interface DrawerState {
   remaining: number;
   ledgerId: string;
   riskTier: string;
+  totalDue?: number;
+  paidAmount?: number;
 }
 
 interface Toast {

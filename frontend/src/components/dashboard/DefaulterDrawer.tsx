@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { useUIStore } from "@/store/uiStore";
-import { useSyncStore, type PaymentMethod } from "@/store/syncStore";
+import { useSyncStore, type PaymentMethod, type PaymentPayload, type ExpectedServerState } from "@/store/syncStore";
 import { cn } from "@/lib/utils";
 import { X, Loader2, CreditCard, Banknote, FileCheck, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: React.ReactN
 
 export function DefaulterDrawer() {
   const { activeDrawer, closeDrawer, addToast } = useUIStore();
-  const { isOnline } = useSyncStore();
+  const { isOnline, addToQueue } = useSyncStore();
   const queryClient = useQueryClient();
 
   const [amount, setAmount] = useState("");
@@ -25,6 +25,7 @@ export function DefaulterDrawer() {
   const [chequeNumber, setChequeNumber] = useState("");
   const [chequeBank, setChequeBank] = useState("");
   const [chequeIssueDate, setChequeIssueDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const isOpen = activeDrawer?.type === "record-payment";
 
@@ -61,6 +62,7 @@ export function DefaulterDrawer() {
       });
     },
     onError: () => {
+      setSubmitting(false);
       addToast({
         title: "Payment failed",
         description: "Failed to record payment. Please try again.",
@@ -77,10 +79,12 @@ export function DefaulterDrawer() {
     setChequeNumber("");
     setChequeBank("");
     setChequeIssueDate("");
+    setSubmitting(false);
   };
 
-  const handleSubmit = () => {
-    if (!activeDrawer) return;
+  const handleSubmit = async () => {
+    if (!activeDrawer || submitting) return;
+    setSubmitting(true);
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       addToast({ title: "Invalid amount", description: "Enter a valid amount.", variant: "error" });
@@ -100,6 +104,53 @@ export function DefaulterDrawer() {
     }
     if (paymentMethod === "UPI" && !transactionRef) {
       addToast({ title: "Transaction ref required", description: "Enter UPI transaction ID.", variant: "error" });
+      return;
+    }
+
+    // Offline: queue with expectedServerState for conflict detection
+    if (!isOnline && activeDrawer) {
+      const expectedServerState: ExpectedServerState = {
+        outstandingBalance: activeDrawer.remaining,
+        paidAmount: activeDrawer.paidAmount ?? 0,
+        lastUpdatedAt: new Date().toISOString(),
+      };
+
+      const payload: PaymentPayload = {
+        id: crypto.randomUUID(),
+        ledgerId: activeDrawer.ledgerId,
+        studentId: activeDrawer.studentId,
+        studentName: activeDrawer.studentName,
+        amount: parsedAmount,
+        paymentMethod,
+        transactionRef: transactionRef || undefined,
+        createdAt: new Date().toISOString(),
+        expectedServerState,
+      };
+
+      addToQueue(payload);
+
+      // Optimistic update
+      queryClient.setQueryData(
+        ["dashboard-defaulters"],
+        (old: { data: Array<{ studentId: string; remaining: number }> } | undefined) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.map((d) =>
+              d.studentId === activeDrawer.studentId
+                ? { ...d, remaining: Math.max(0, d.remaining - parsedAmount) }
+                : d
+            ),
+          };
+        }
+      );
+
+      handleClose();
+      addToast({
+        title: "Saved offline",
+        description: `Rs. ${parsedAmount.toLocaleString("en-IN")} payment for ${activeDrawer.studentName} will sync when online.`,
+        variant: "default",
+      });
       return;
     }
 
@@ -279,6 +330,7 @@ export function DefaulterDrawer() {
           <Button
             onClick={handleSubmit}
             disabled={
+              submitting ||
               !amount ||
               parseFloat(amount) <= 0 ||
               mutation.isPending ||
@@ -287,7 +339,7 @@ export function DefaulterDrawer() {
             }
             className="flex-1 bg-primary text-white hover:bg-primary/90"
           >
-            {mutation.isPending ? (
+            {submitting || mutation.isPending ? (
               <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
             ) : (
               "Record Payment"

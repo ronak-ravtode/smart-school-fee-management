@@ -2,6 +2,12 @@ import { z } from "zod";
 
 const PaymentMethodEnum = z.enum(["UPI", "CASH", "CHEQUE"]);
 
+const ExpectedServerStateSchema = z.object({
+  outstandingBalance: z.number(),
+  paidAmount: z.number(),
+  lastUpdatedAt: z.string(),
+}).optional();
+
 export const SinglePaymentSchema = z.object({
   ledgerId: z.string().uuid("Invalid ledger ID"),
   amount: z.number().positive("Amount must be positive"),
@@ -11,6 +17,7 @@ export const SinglePaymentSchema = z.object({
   chequeNumber: z.string().max(50).optional(),
   chequeBank: z.string().max(100).optional(),
   chequeIssueDate: z.string().optional(),
+  expectedServerState: ExpectedServerStateSchema,
 }).refine(
   (data) => {
     if (data.paymentMethod === "CHEQUE") {

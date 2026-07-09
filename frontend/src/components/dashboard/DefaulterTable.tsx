@@ -8,8 +8,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { CreditCard, Bell, ExternalLink, MoreVertical, History, Ban } from "lucide-react";
+import { CreditCard, Bell, ExternalLink, MoreVertical, History, Ban, CloudOff } from "lucide-react";
 import { useUIStore } from "@/store/uiStore";
+import { useSyncStore } from "@/store/syncStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -165,6 +166,10 @@ function KebabMenu({ record, onRecordPayment, onSendReminder }: {
 export function DefaulterTable({ data, isLoading, compact = false }: DefaulterTableProps) {
   const { openDrawer, addToast } = useUIStore();
   const queryClient = useQueryClient();
+  const { pendingQueue } = useSyncStore();
+
+  // Build a set of studentIds with pending offline payments
+  const unsyncedStudentIds = new Set(pendingQueue.map((p) => p.studentId));
 
   const handleRecordPayment = (record: DefaulterRecord) => {
     openDrawer({
@@ -174,6 +179,8 @@ export function DefaulterTable({ data, isLoading, compact = false }: DefaulterTa
       remaining: record.remaining,
       ledgerId: record.ledgerId,
       riskTier: record.riskTier ?? "LOW",
+      totalDue: record.totalDue,
+      paidAmount: record.totalPaid,
     });
   };
 
@@ -285,7 +292,15 @@ export function DefaulterTable({ data, isLoading, compact = false }: DefaulterTa
                         {record.studentName.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-on-surface">{record.studentName}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-semibold text-on-surface">{record.studentName}</p>
+                          {/* Step 4: Row-level unsynced indicator */}
+                          {unsyncedStudentIds.has(record.studentId) && (
+                            <span title="Unsynced payment pending">
+                              <CloudOff className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                            </span>
+                          )}
+                        </div>
                         {!compact && (
                           <p className="text-[10px] text-on-surface-variant">{record.email}</p>
                         )}

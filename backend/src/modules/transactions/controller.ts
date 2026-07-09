@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "@/utils/asyncHandler";
-import { sendSuccess } from "@/utils/apiResponse";
+import { sendSuccess, sendError } from "@/utils/apiResponse";
+import { prisma } from "@/lib/prisma";
 import * as transactionService from "@/services/transactionService";
 import {
   SinglePaymentInput,
@@ -10,10 +11,76 @@ import {
   BounceChequeSchema,
 } from "./schemas";
 
+// ─── Step 2: Conflict Detection Engine ───────────────────────────────────────
+// Validates expectedServerState before processing offline-queued payments
+
+async function checkForConflict(
+  ledgerId: string,
+  expectedServerState?: {
+    outstandingBalance: number;
+    paidAmount: number;
+    lastUpdatedAt: string;
+  }
+): Promise<{ hasConflict: boolean; currentServerState?: any }> {
+  if (!expectedServerState) {
+    return { hasConflict: false };
+  }
+
+  const ledger = await prisma.studentFeeLedger.findUnique({
+    where: { id: ledgerId },
+  });
+
+  if (!ledger) {
+    return { hasConflict: false };
+  }
+
+  const totalAmount = Number(ledger.totalAmount);
+  const waivedAmount = Number(ledger.waivedAmount);
+  const paidAmount = Number(ledger.paidAmount);
+  const currentOutstanding = totalAmount - waivedAmount - paidAmount;
+
+  // Check if paidAmount changed while offline (someone else recorded a payment)
+  const paidAmountChanged =
+    Math.abs(paidAmount - expectedServerState.paidAmount) > 0.01;
+
+  if (paidAmountChanged) {
+    return {
+      hasConflict: true,
+      currentServerState: {
+        outstandingBalance: currentOutstanding,
+        paidAmount,
+        lastUpdatedAt: ledger.updatedAt.toISOString(),
+        paidAmountChanged: true,
+      },
+    };
+  }
+
+  return { hasConflict: false };
+}
+
 export const recordPayment = asyncHandler(
   async (req: Request, res: Response) => {
     const input = req.body as SinglePaymentInput;
-    const actor = req.user ? { id: req.user.id, name: req.user.name, ipAddress: req.ip } : undefined;
+    const actor = req.user
+      ? { id: req.user.id, name: req.user.name, ipAddress: req.ip }
+      : undefined;
+
+    // Step 2: Conflict detection for offline-queued payments
+    const conflict = await checkForConflict(
+      input.ledgerId,
+      input.expectedServerState
+    );
+
+    if (conflict.hasConflict) {
+      res.status(409).json(
+        sendError("SYNC_CONFLICT", "Server state has changed since this action was queued", {
+          currentServerState: conflict.currentServerState,
+          expectedServerState: input.expectedServerState,
+        })
+      );
+      return;
+    }
+
     const result = await transactionService.recordSinglePayment(input, actor);
     res.status(201).json(
       sendSuccess(
@@ -30,8 +97,13 @@ export const recordPayment = asyncHandler(
 export const bulkReconcile = asyncHandler(
   async (req: Request, res: Response) => {
     const input = req.body as BulkReconcileInput;
-    const actor = req.user ? { id: req.user.id, name: req.user.name, ipAddress: req.ip } : undefined;
-    const result = await transactionService.bulkReconcile(input.payments, actor);
+    const actor = req.user
+      ? { id: req.user.id, name: req.user.name, ipAddress: req.ip }
+      : undefined;
+    const result = await transactionService.bulkReconcile(
+      input.payments,
+      actor
+    );
     res.status(201).json(
       sendSuccess(
         {
@@ -67,7 +139,9 @@ export const clearCheque = asyncHandler(
       actualClearedAmount?: number;
       reason?: string;
     };
-    const actor = req.user ? { id: req.user.id, name: req.user.name, ipAddress: req.ip } : undefined;
+    const actor = req.user
+      ? { id: req.user.id, name: req.user.name, ipAddress: req.ip }
+      : undefined;
     const result = await transactionService.clearCheque({
       transactionId,
       actualClearedAmount,
@@ -89,8 +163,13 @@ export const clearCheque = asyncHandler(
 
 export const bounceCheque = asyncHandler(
   async (req: Request, res: Response) => {
-    const { transactionId, reason } = req.body as { transactionId: string; reason: string };
-    const actor = req.user ? { id: req.user.id, name: req.user.name, ipAddress: req.ip } : undefined;
+    const { transactionId, reason } = req.body as {
+      transactionId: string;
+      reason: string;
+    };
+    const actor = req.user
+      ? { id: req.user.id, name: req.user.name, ipAddress: req.ip }
+      : undefined;
     const result = await transactionService.bounceCheque({
       transactionId,
       actor,

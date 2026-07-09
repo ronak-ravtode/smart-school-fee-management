@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUIStore } from "@/store/uiStore";
-import { useSyncStore, type PaymentPayload, type PaymentMethod } from "@/store/syncStore";
+import { useSyncStore, type PaymentPayload, type PaymentMethod, type ExpectedServerState } from "@/store/syncStore";
 import { CreditCard, Banknote, FileCheck, WifiOff, Download, Loader2, CheckCircle2 } from "lucide-react";
 
 interface SinglePaymentModalProps {
@@ -21,6 +21,9 @@ interface SinglePaymentModalProps {
   studentName: string;
   remaining: number;
   ledgerId?: string;
+  totalDue?: number;
+  paidAmount?: number;
+  ledgerUpdatedAt?: string;
 }
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: React.ReactNode }[] = [
@@ -34,6 +37,9 @@ export function SinglePaymentModal({
   studentName,
   remaining,
   ledgerId,
+  totalDue,
+  paidAmount,
+  ledgerUpdatedAt,
 }: SinglePaymentModalProps) {
   const { activeModal, closeModal, addToast } = useUIStore();
   const { isOnline, addToQueue } = useSyncStore();
@@ -47,6 +53,7 @@ export function SinglePaymentModal({
   const [chequeIssueDate, setChequeIssueDate] = useState("");
   const [lastTransactionId, setLastTransactionId] = useState<string | null>(null);
   const [lastWasCheque, setLastWasCheque] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const isOpen = activeModal === `payment-${studentId}`;
 
@@ -82,6 +89,7 @@ export function SinglePaymentModal({
       }
     },
     onError: () => {
+      setSubmitting(false);
       addToast({
         title: "Payment failed",
         description: "Failed to record payment. Please try again.",
@@ -100,9 +108,12 @@ export function SinglePaymentModal({
     setChequeIssueDate("");
     setLastTransactionId(null);
     setLastWasCheque(false);
+    setSubmitting(false);
   };
 
   const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       addToast({
@@ -161,6 +172,15 @@ export function SinglePaymentModal({
     }
 
     if (!isOnline) {
+      const expectedServerState: ExpectedServerState | undefined =
+        totalDue !== undefined && paidAmount !== undefined
+          ? {
+              outstandingBalance: remaining,
+              paidAmount,
+              lastUpdatedAt: ledgerUpdatedAt ?? new Date().toISOString(),
+            }
+          : undefined;
+
       const payload: PaymentPayload = {
         id: crypto.randomUUID(),
         ledgerId: resolvedLedgerId,
@@ -170,6 +190,7 @@ export function SinglePaymentModal({
         paymentMethod,
         transactionRef: transactionRef || undefined,
         createdAt: new Date().toISOString(),
+        expectedServerState,
       };
 
       addToQueue(payload);
@@ -399,10 +420,10 @@ export function SinglePaymentModal({
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!amount || parseFloat(amount) <= 0 || mutation.isPending || (paymentMethod === "UPI" && !transactionRef) || (paymentMethod === "CHEQUE" && (!chequeNumber.trim() || !chequeBank.trim() || !chequeIssueDate))}
+                disabled={submitting || !amount || parseFloat(amount) <= 0 || mutation.isPending || (paymentMethod === "UPI" && !transactionRef) || (paymentMethod === "CHEQUE" && (!chequeNumber.trim() || !chequeBank.trim() || !chequeIssueDate))}
                 className="bg-primary text-white hover:bg-primary/90"
               >
-                {mutation.isPending ? (
+                {submitting || mutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Processing...
