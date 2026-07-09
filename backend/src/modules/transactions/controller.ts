@@ -59,13 +59,17 @@ export const getPendingCheques = asyncHandler(
 
 export const clearCheque = asyncHandler(
   async (req: Request, res: Response) => {
-    const { transactionId } = req.body as ReconcileChequeInput;
-    const result = await transactionService.clearCheque(transactionId);
+    const { transactionId, actualClearedAmount } = req.body as ReconcileChequeInput;
+    const result = await transactionService.clearCheque({
+      transactionId,
+      actualClearedAmount,
+    });
     res.json(
       sendSuccess(
         {
           transaction: result.transaction,
           ledger: result.ledger,
+          remainingTransaction: result.remainingTransaction ?? null,
         },
         "Cheque cleared successfully"
       )
@@ -76,9 +80,15 @@ export const clearCheque = asyncHandler(
 export const bounceCheque = asyncHandler(
   async (req: Request, res: Response) => {
     const { transactionId } = req.body as ReconcileChequeInput;
-    const transaction = await transactionService.bounceCheque(transactionId);
+    const result = await transactionService.bounceCheque(transactionId);
     res.json(
-      sendSuccess(transaction, "Cheque marked as bounced")
+      sendSuccess(
+        {
+          transaction: result.transaction,
+          ledger: result.ledger,
+        },
+        "Cheque marked as bounced. Late fee penalty recalculated from original due date."
+      )
     );
   }
 );

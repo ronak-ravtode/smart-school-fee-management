@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ─── Student ──────────────────────────────────────────────────────────────────
@@ -96,18 +95,19 @@ model StudentFeeLedger {
 // Represents an actual payment event.
 
 model Transaction {
-  id             String            @id @default(uuid()) @map("id")
-  ledgerId       String            @map("ledger_id")
-  amount         Decimal           @db.Decimal(10, 2) @map("amount")
-  paymentMethod  PaymentMethod     @map("payment_method")
-  transactionRef String?           @map("transaction_ref")
-  receiptNumber  String?           @unique @map("receipt_number")
-  status         TransactionStatus @default(PENDING) @map("status")
-  chequeNumber   String?           @map("cheque_number")
-  chequeBank     String?           @map("cheque_bank")
-  chequeIssueDate DateTime?        @map("cheque_issue_date")
-  createdAt      DateTime          @default(now()) @map("created_at")
-  updatedAt      DateTime          @updatedAt @map("updated_at")
+  id                String            @id @default(uuid()) @map("id")
+  ledgerId          String            @map("ledger_id")
+  amount            Decimal           @db.Decimal(10, 2) @map("amount")
+  paymentMethod     PaymentMethod     @map("payment_method")
+  transactionRef    String?           @map("transaction_ref")
+  receiptNumber     String?           @unique @map("receipt_number")
+  status            TransactionStatus @default(PENDING) @map("status")
+  chequeNumber      String?           @map("cheque_number")
+  chequeBank        String?           @map("cheque_bank")
+  chequeIssueDate   DateTime?         @map("cheque_issue_date")
+  actualClearedAmount Decimal?        @db.Decimal(10, 2) @map("actual_cleared_amount")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
 
   // Relations
   ledger StudentFeeLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
@@ -143,6 +143,7 @@ enum TransactionStatus {
   FAILED
   PENDING_CLEARANCE
   CLEARED
+  PARTIALLY_CLEARED
   BOUNCED
 }
 

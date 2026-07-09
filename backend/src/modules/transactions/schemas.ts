@@ -53,6 +53,7 @@ export const LedgerTransactionsParamsSchema = z.object({
 
 export const ReconcileChequeSchema = z.object({
   transactionId: z.string().uuid("Invalid transaction ID"),
+  actualClearedAmount: z.number().positive("Cleared amount must be positive").optional(),
 });
 
 export type SinglePaymentInput = z.infer<typeof SinglePaymentSchema>;
