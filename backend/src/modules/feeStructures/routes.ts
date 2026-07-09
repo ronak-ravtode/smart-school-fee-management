@@ -5,6 +5,7 @@ import {
   FeeStructureQuerySchema,
   FeeStructureParamsSchema,
   FeeStructureByClassParamsSchema,
+  DeleteFeeStructureSchema,
 } from "./schemas";
 import {
   createFeeStructure,
@@ -49,6 +50,7 @@ router.post(
 router.delete(
   "/:id",
   validate(FeeStructureParamsSchema, "params"),
+  validate(DeleteFeeStructureSchema, "body"),
   deleteFeeStructure
 );
 

@@ -17,6 +17,7 @@ const navItems: NavItem[] = [
   { label: "Transactions", href: "/transactions", materialIcon: "receipt_long" },
   { label: "Bulk Reconcile", href: "/bulk-reconciliation", materialIcon: "receipt_long" },
   { label: "Cheque Reconciliation", href: "/cheque-reconciliation", materialIcon: "account_balance" },
+  { label: "Audit Trail", href: "/audit-trail", materialIcon: "history" },
   { label: "Settings", href: "/settings", materialIcon: "settings" },
 ];
 

@@ -1,4 +1,3 @@
-import { TrendingUp, DollarSign, AlertTriangle, CheckCircle } from "lucide-react";
 import type { DashboardMetrics } from "@/types/dashboard";
 
 interface MetricCardsProps {
@@ -14,6 +13,10 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+type FooterResult =
+  | { showProgress: true; progress: number; text: string; color: string; icon?: undefined }
+  | { showProgress?: false; text: string; color: string; icon?: string };
+
 const cards = [
   {
     key: "expected" as const,
@@ -22,8 +25,7 @@ const cards = [
     materialIcon: "payments",
     containerColor: "bg-primary-container text-primary",
     delay: 0,
-    footer: (m: DashboardMetrics | undefined) => ({
-      icon: "trending_up",
+    footer: (_m: DashboardMetrics | undefined): FooterResult => ({
       text: "8% from last term",
       color: "text-primary",
     }),
@@ -32,11 +34,10 @@ const cards = [
     key: "collected" as const,
     title: "Collected",
     getValue: (m: DashboardMetrics) => m.totalCollected,
-    getSubtitle: (m: DashboardMetrics) => `${m.collectionPercentage}% collected`,
     materialIcon: "check_circle",
     containerColor: "bg-tertiary-container text-tertiary",
     delay: 80,
-    footer: (m: DashboardMetrics | undefined) => ({
+    footer: (m: DashboardMetrics | undefined): FooterResult => ({
       showProgress: true,
       progress: m?.collectionPercentage ?? 0,
       text: `${m?.collectionPercentage ?? 0}% collected`,
@@ -50,7 +51,7 @@ const cards = [
     materialIcon: "history",
     containerColor: "bg-secondary-container text-secondary",
     delay: 160,
-    footer: (m: DashboardMetrics | undefined) => ({
+    footer: (_m: DashboardMetrics | undefined): FooterResult => ({
       text: "12 invoices pending",
       color: "text-secondary",
     }),
@@ -62,7 +63,7 @@ const cards = [
     materialIcon: "warning",
     containerColor: "bg-error-container text-error",
     delay: 240,
-    footer: (m: DashboardMetrics | undefined) => ({
+    footer: (_m: DashboardMetrics | undefined): FooterResult => ({
       icon: "verified_user",
       text: "System all clear",
       color: "text-tertiary",

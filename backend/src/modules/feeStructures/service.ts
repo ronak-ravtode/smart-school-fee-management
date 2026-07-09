@@ -1,26 +1,28 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NotFoundError, ConflictError } from "@/lib/errors";
+import { createAuditLog, ActorInfo } from "@/services/auditService";
 import {
   CreateFeeStructureInput,
   FeeStructureQueryInput,
 } from "./schemas";
 
-export async function createFeeStructure(data: CreateFeeStructureInput) {
-  const feeType = await prisma.feeType.findUnique({
-    where: { id: data.feeTypeId },
+const SOFT_DELETE_WHERE = { isDeleted: false } as const;
+
+export async function createFeeStructure(data: CreateFeeStructureInput, actor?: ActorInfo) {
+  const feeType = await prisma.feeType.findFirst({
+    where: { id: data.feeTypeId, ...SOFT_DELETE_WHERE },
   });
   if (!feeType) {
     throw new NotFoundError("FeeType", data.feeTypeId);
   }
 
-  const existing = await prisma.feeStructure.findUnique({
+  const existing = await prisma.feeStructure.findFirst({
     where: {
-      feeTypeId_class_section: {
-        feeTypeId: data.feeTypeId,
-        class: data.class,
-        section: data.section,
-      },
+      feeTypeId: data.feeTypeId,
+      class: data.class,
+      section: data.section,
+      ...SOFT_DELETE_WHERE,
     },
   });
   if (existing) {
@@ -29,14 +31,33 @@ export async function createFeeStructure(data: CreateFeeStructureInput) {
     );
   }
 
-  return prisma.feeStructure.create({
-    data: {
-      feeTypeId: data.feeTypeId,
-      class: data.class,
-      section: data.section,
-      amount: data.amount,
-    },
-    include: { feeType: true },
+  return prisma.$transaction(async (tx) => {
+    const feeStructure = await tx.feeStructure.create({
+      data: {
+        feeTypeId: data.feeTypeId,
+        class: data.class,
+        section: data.section,
+        amount: data.amount,
+      },
+      include: { feeType: true },
+    });
+
+    await createAuditLog({
+      actorId: actor?.actorId ?? "system",
+      actorName: actor?.actorName ?? "System",
+      action: "CREATED",
+      entityType: "FeeStructure",
+      entityId: feeStructure.id,
+      newValue: {
+        feeTypeId: feeStructure.feeTypeId,
+        className: feeStructure.class,
+        section: feeStructure.section,
+        amount: Number(feeStructure.amount),
+      },
+      ipAddress: actor?.ipAddress,
+    }, tx);
+
+    return feeStructure;
   });
 }
 
@@ -44,7 +65,7 @@ export async function getFeeStructures(query: FeeStructureQueryInput) {
   const { page, limit, class: studentClass, section } = query;
   const skip = (page - 1) * limit;
 
-  const where: Prisma.FeeStructureWhereInput = {};
+  const where: Prisma.FeeStructureWhereInput = { ...SOFT_DELETE_WHERE };
 
   if (studentClass) {
     where.class = studentClass;
@@ -68,8 +89,8 @@ export async function getFeeStructures(query: FeeStructureQueryInput) {
 }
 
 export async function getFeeStructureById(id: string) {
-  const feeStructure = await prisma.feeStructure.findUnique({
-    where: { id },
+  const feeStructure = await prisma.feeStructure.findFirst({
+    where: { id, ...SOFT_DELETE_WHERE },
     include: { feeType: true },
   });
   if (!feeStructure) {
@@ -82,7 +103,7 @@ export async function getFeeStructuresByClass(
   studentClass: string,
   section?: string
 ) {
-  const where: Prisma.FeeStructureWhereInput = { class: studentClass };
+  const where: Prisma.FeeStructureWhereInput = { class: studentClass, ...SOFT_DELETE_WHERE };
   if (section) {
     where.section = section;
   }
@@ -94,7 +115,40 @@ export async function getFeeStructuresByClass(
   });
 }
 
-export async function deleteFeeStructure(id: string) {
-  await getFeeStructureById(id);
-  return prisma.feeStructure.delete({ where: { id } });
+export async function deleteFeeStructure(id: string, actor?: ActorInfo, reason?: string) {
+  const existing = await getFeeStructureById(id);
+
+  // Check for linked ledgers before soft-deleting
+  const linkedLedgers = await prisma.studentFeeLedger.count({
+    where: { feeStructureId: id, ...SOFT_DELETE_WHERE },
+  });
+  if (linkedLedgers > 0) {
+    throw new ConflictError(
+      `Cannot delete fee structure: ${linkedLedgers} ledger(s) still reference it. Remove them first.`
+    );
+  }
+
+  return prisma.$transaction(async (tx) => {
+    // Edge Case 1: Soft delete — UPDATE instead of DELETE
+    await tx.feeStructure.update({
+      where: { id },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
+
+    await createAuditLog({
+      actorId: actor?.actorId ?? "system",
+      actorName: actor?.actorName ?? "System",
+      action: "DELETED",
+      entityType: "FeeStructure",
+      entityId: id,
+      previousValue: {
+        feeTypeId: existing.feeTypeId,
+        className: existing.class,
+        section: existing.section,
+        amount: Number(existing.amount),
+      },
+      reason,
+      ipAddress: actor?.ipAddress,
+    }, tx);
+  });
 }

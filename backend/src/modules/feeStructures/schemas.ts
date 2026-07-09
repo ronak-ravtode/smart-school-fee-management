@@ -23,9 +23,14 @@ export const FeeStructureByClassParamsSchema = z.object({
   section: z.string().optional(),
 });
 
+export const DeleteFeeStructureSchema = z.object({
+  reason: z.string().min(10, "Reason is required and must be at least 10 characters"),
+});
+
 export type CreateFeeStructureInput = z.infer<typeof CreateFeeStructureSchema>;
 export type FeeStructureQueryInput = z.infer<typeof FeeStructureQuerySchema>;
 export type FeeStructureParamsInput = z.infer<typeof FeeStructureParamsSchema>;
 export type FeeStructureByClassParamsInput = z.infer<
   typeof FeeStructureByClassParamsSchema
 >;
+export type DeleteFeeStructureInput = z.infer<typeof DeleteFeeStructureSchema>;

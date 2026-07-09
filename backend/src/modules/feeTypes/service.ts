@@ -1,26 +1,47 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NotFoundError, ConflictError } from "@/lib/errors";
+import { createAuditLog, ActorInfo } from "@/services/auditService";
 import {
   CreateFeeTypeInput,
   UpdateFeeTypeInput,
   FeeTypeQueryInput,
 } from "./schemas";
 
-export async function createFeeType(data: CreateFeeTypeInput) {
-  const existing = await prisma.feeType.findUnique({
-    where: { name: data.name },
+const SOFT_DELETE_WHERE = { isDeleted: false } as const;
+
+export async function createFeeType(data: CreateFeeTypeInput, actor?: ActorInfo) {
+  const existing = await prisma.feeType.findFirst({
+    where: { name: data.name, ...SOFT_DELETE_WHERE },
   });
   if (existing) {
     throw new ConflictError("A fee type with this name already exists");
   }
 
-  return prisma.feeType.create({
-    data: {
-      name: data.name,
-      baseAmount: data.baseAmount,
-      rules: data.rules ?? Prisma.JsonNull,
-    },
+  return prisma.$transaction(async (tx) => {
+    const feeType = await tx.feeType.create({
+      data: {
+        name: data.name,
+        baseAmount: data.baseAmount,
+        rules: data.rules ?? Prisma.JsonNull,
+      },
+    });
+
+    await createAuditLog({
+      actorId: actor?.actorId ?? "system",
+      actorName: actor?.actorName ?? "System",
+      action: "CREATED",
+      entityType: "FeeType",
+      entityId: feeType.id,
+      newValue: {
+        name: feeType.name,
+        baseAmount: Number(feeType.baseAmount),
+        rules: feeType.rules,
+      },
+      ipAddress: actor?.ipAddress,
+    }, tx);
+
+    return feeType;
   });
 }
 
@@ -28,7 +49,7 @@ export async function getFeeTypes(query: FeeTypeQueryInput) {
   const { page, limit, search } = query;
   const skip = (page - 1) * limit;
 
-  const where: Prisma.FeeTypeWhereInput = {};
+  const where: Prisma.FeeTypeWhereInput = { ...SOFT_DELETE_WHERE };
 
   if (search) {
     where.name = { contains: search, mode: "insensitive" };
@@ -48,40 +69,63 @@ export async function getFeeTypes(query: FeeTypeQueryInput) {
 }
 
 export async function getFeeTypeById(id: string) {
-  const feeType = await prisma.feeType.findUnique({ where: { id } });
+  const feeType = await prisma.feeType.findFirst({ where: { id, ...SOFT_DELETE_WHERE } });
   if (!feeType) {
     throw new NotFoundError("FeeType", id);
   }
   return feeType;
 }
 
-export async function updateFeeType(id: string, data: UpdateFeeTypeInput) {
-  await getFeeTypeById(id);
+export async function updateFeeType(id: string, data: UpdateFeeTypeInput, actor?: ActorInfo) {
+  const existing = await getFeeTypeById(id);
 
   if (data.name) {
-    const existing = await prisma.feeType.findFirst({
-      where: { name: data.name, NOT: { id } },
+    const duplicate = await prisma.feeType.findFirst({
+      where: { name: data.name, NOT: { id }, ...SOFT_DELETE_WHERE },
     });
-    if (existing) {
+    if (duplicate) {
       throw new ConflictError("A fee type with this name already exists");
     }
   }
 
-  const updateData: Prisma.FeeTypeUpdateInput = {};
-  if (data.name !== undefined) updateData.name = data.name;
-  if (data.baseAmount !== undefined) updateData.baseAmount = data.baseAmount;
-  if (data.rules !== undefined) {
-    updateData.rules = data.rules === null ? Prisma.JsonNull : data.rules;
-  }
+  return prisma.$transaction(async (tx) => {
+    const updateData: Prisma.FeeTypeUpdateInput = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.baseAmount !== undefined) updateData.baseAmount = data.baseAmount;
+    if (data.rules !== undefined) {
+      updateData.rules = data.rules === null ? Prisma.JsonNull : data.rules;
+    }
 
-  return prisma.feeType.update({ where: { id }, data: updateData });
+    const updated = await tx.feeType.update({ where: { id }, data: updateData });
+
+    await createAuditLog({
+      actorId: actor?.actorId ?? "system",
+      actorName: actor?.actorName ?? "System",
+      action: "UPDATED",
+      entityType: "FeeType",
+      entityId: id,
+      previousValue: {
+        name: existing.name,
+        baseAmount: Number(existing.baseAmount),
+        rules: existing.rules,
+      },
+      newValue: {
+        name: updated.name,
+        baseAmount: Number(updated.baseAmount),
+        rules: updated.rules,
+      },
+      ipAddress: actor?.ipAddress,
+    }, tx);
+
+    return updated;
+  });
 }
 
-export async function deleteFeeType(id: string) {
-  await getFeeTypeById(id);
+export async function deleteFeeType(id: string, actor?: ActorInfo, reason?: string) {
+  const existing = await getFeeTypeById(id);
 
   const linkedStructures = await prisma.feeStructure.count({
-    where: { feeTypeId: id },
+    where: { feeTypeId: id, ...SOFT_DELETE_WHERE },
   });
   if (linkedStructures > 0) {
     throw new ConflictError(
@@ -89,5 +133,26 @@ export async function deleteFeeType(id: string) {
     );
   }
 
-  return prisma.feeType.delete({ where: { id } });
+  return prisma.$transaction(async (tx) => {
+    // Edge Case 1: Soft delete — UPDATE instead of DELETE
+    await tx.feeType.update({
+      where: { id },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
+
+    await createAuditLog({
+      actorId: actor?.actorId ?? "system",
+      actorName: actor?.actorName ?? "System",
+      action: "DELETED",
+      entityType: "FeeType",
+      entityId: id,
+      previousValue: {
+        name: existing.name,
+        baseAmount: Number(existing.baseAmount),
+        rules: existing.rules,
+      },
+      reason,
+      ipAddress: actor?.ipAddress,
+    }, tx);
+  });
 }

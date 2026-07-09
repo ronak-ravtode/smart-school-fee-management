@@ -5,6 +5,7 @@ import {
   BulkReconcileSchema,
   LedgerTransactionsParamsSchema,
   ReconcileChequeSchema,
+  BounceChequeSchema,
 } from "./schemas";
 import {
   recordPayment,
@@ -45,7 +46,7 @@ router.post(
 
 router.post(
   "/bounce-cheque",
-  validate(ReconcileChequeSchema, "body"),
+  validate(BounceChequeSchema, "body"),
   bounceCheque
 );
 

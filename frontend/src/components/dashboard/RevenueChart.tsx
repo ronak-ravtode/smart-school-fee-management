@@ -129,7 +129,7 @@ export function RevenueChart({ data, isLoading }: RevenueChartProps) {
 
           {/* X-axis labels */}
           <div className="flex justify-around mt-3">
-            {data.map((item, index) => (
+            {data.map((item) => (
               <div key={item.feeTypeName} className="text-center" style={{ width: 64 }}>
                 <p className="text-[9px] font-bold text-stone-400 uppercase leading-tight truncate">
                   {item.feeTypeName}

@@ -9,6 +9,7 @@ import { Login } from "@/pages/Login";
 import { Dashboard } from "@/pages/Dashboard";
 import { BulkReconciliation } from "@/pages/BulkReconciliation";
 import { ChequeReconciliation } from "@/pages/ChequeReconciliation";
+import { AuditLogTable } from "@/pages/AuditLogTable";
 import { FeeTypesPage } from "@/pages/fee-types/FeeTypesPage";
 import { FeeStructuresPage } from "@/pages/fee-types/FeeStructuresPage";
 import { GenerateLedgerPage } from "@/pages/ledgers/GenerateLedgerPage";
@@ -50,6 +51,14 @@ function App() {
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/bulk-reconciliation" element={<BulkReconciliation />} />
                   <Route path="/cheque-reconciliation" element={<ChequeReconciliation />} />
+                  <Route
+                    path="/audit-trail"
+                    element={
+                      <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <AuditLogTable />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/fee-types"
                     element={

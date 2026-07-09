@@ -54,6 +54,12 @@ export const LedgerTransactionsParamsSchema = z.object({
 export const ReconcileChequeSchema = z.object({
   transactionId: z.string().uuid("Invalid transaction ID"),
   actualClearedAmount: z.number().positive("Cleared amount must be positive").optional(),
+  reason: z.string().optional(),
+});
+
+export const BounceChequeSchema = z.object({
+  transactionId: z.string().uuid("Invalid transaction ID"),
+  reason: z.string().min(10, "Reason is required and must be at least 10 characters"),
 });
 
 export type SinglePaymentInput = z.infer<typeof SinglePaymentSchema>;
@@ -62,3 +68,4 @@ export type LedgerTransactionsParams = z.infer<
   typeof LedgerTransactionsParamsSchema
 >;
 export type ReconcileChequeInput = z.infer<typeof ReconcileChequeSchema>;
+export type BounceChequeInput = z.infer<typeof BounceChequeSchema>;

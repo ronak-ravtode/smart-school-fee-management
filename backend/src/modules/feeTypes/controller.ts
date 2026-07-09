@@ -12,7 +12,8 @@ import {
 export const createFeeType = asyncHandler(
   async (req: Request, res: Response) => {
     const data = req.body as CreateFeeTypeInput;
-    const feeType = await feeTypeService.createFeeType(data);
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    const feeType = await feeTypeService.createFeeType(data, actor);
     res.status(201).json(sendSuccess(feeType, "Fee type created"));
   }
 );
@@ -47,7 +48,8 @@ export const updateFeeType = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as FeeTypeParamsInput;
     const data = req.body as UpdateFeeTypeInput;
-    const feeType = await feeTypeService.updateFeeType(id, data);
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    const feeType = await feeTypeService.updateFeeType(id, data, actor);
     res.json(sendSuccess(feeType, "Fee type updated"));
   }
 );
@@ -55,7 +57,9 @@ export const updateFeeType = asyncHandler(
 export const deleteFeeType = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as FeeTypeParamsInput;
-    await feeTypeService.deleteFeeType(id);
+    const { reason } = req.body as { reason?: string };
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    await feeTypeService.deleteFeeType(id, actor, reason);
     res.json(sendSuccess(null, "Fee type deleted"));
   }
 );

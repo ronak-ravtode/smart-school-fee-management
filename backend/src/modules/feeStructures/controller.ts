@@ -12,7 +12,8 @@ import {
 export const createFeeStructure = asyncHandler(
   async (req: Request, res: Response) => {
     const data = req.body as CreateFeeStructureInput;
-    const feeStructure = await feeStructureService.createFeeStructure(data);
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    const feeStructure = await feeStructureService.createFeeStructure(data, actor);
     res.status(201).json(sendSuccess(feeStructure, "Fee structure created"));
   }
 );
@@ -58,7 +59,9 @@ export const getFeeStructuresByClass = asyncHandler(
 export const deleteFeeStructure = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as FeeStructureParamsInput;
-    await feeStructureService.deleteFeeStructure(id);
+    const { reason } = req.body as { reason?: string };
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    await feeStructureService.deleteFeeStructure(id, actor, reason);
     res.json(sendSuccess(null, "Fee structure deleted"));
   }
 );

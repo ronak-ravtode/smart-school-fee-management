@@ -3,8 +3,17 @@ import Decimal from "decimal.js";
 import { prisma } from "@/lib/prisma";
 import { NotFoundError, ValidationError, ConflictError } from "@/lib/errors";
 import { calculateFee, toPrismaDecimal, FeeRules } from "./feeEngine";
+import { createAuditLog } from "./auditService";
 
 Decimal.set({ precision: 20, rounding: Decimal.ROUND_HALF_UP });
+
+export interface ActorInfo {
+  id: string;
+  name: string;
+  ipAddress?: string;
+}
+
+const SOFT_DELETE_WHERE = { isDeleted: false } as const;
 
 export interface SinglePaymentInput {
   ledgerId: string;
@@ -36,12 +45,20 @@ export interface PaymentResult {
 export interface ClearChequeInput {
   transactionId: string;
   actualClearedAmount?: number;
+  actor?: ActorInfo;
+  reason?: string;
 }
 
 export interface ClearChequeResult {
   transaction: Transaction;
   ledger: StudentFeeLedger;
   remainingTransaction?: Transaction;
+}
+
+export interface BounceChequeInput {
+  transactionId: string;
+  actor?: ActorInfo;
+  reason: string;
 }
 
 function determineLedgerStatus(
@@ -54,8 +71,6 @@ function determineLedgerStatus(
 }
 
 // ─── Edge Case 3: Ghost Cheque Detection ─────────────────────────────────────
-// Checks if the same student already has a CHEQUE with the same number + bank
-// recorded in the last 30 days. Blocks duplicate entries.
 
 async function checkForDuplicateCheque(
   tx: Prisma.TransactionClient,
@@ -76,6 +91,7 @@ async function checkForDuplicateCheque(
         studentId,
       },
       status: { notIn: ["BOUNCED"] },
+      ...SOFT_DELETE_WHERE,
     },
     select: { id: true, chequeNumber: true, createdAt: true },
   });
@@ -89,7 +105,8 @@ async function checkForDuplicateCheque(
 
 async function validateAndRecordPayment(
   tx: Prisma.TransactionClient,
-  input: SinglePaymentInput
+  input: SinglePaymentInput,
+  actor?: ActorInfo
 ): Promise<PaymentResult> {
   const ledger = await tx.studentFeeLedger.findUnique({
     where: { id: input.ledgerId },
@@ -119,7 +136,6 @@ async function validateAndRecordPayment(
       throw new ValidationError("Cheque number, bank name, and issue date are required for cheque payments");
     }
 
-    // Edge Case 3: Block duplicate cheques
     await checkForDuplicateCheque(
       tx,
       ledger.studentId,
@@ -140,6 +156,25 @@ async function validateAndRecordPayment(
         chequeIssueDate: new Date(input.chequeIssueDate),
       },
     });
+
+    if (actor) {
+      await createAuditLog({
+        actorId: actor.id,
+        actorName: actor.name,
+        action: "PAYMENT_RECORDED",
+        entityType: "Transaction",
+        entityId: transaction.id,
+        newValue: {
+          amount: amount.toNumber(),
+          paymentMethod: "CHEQUE",
+          chequeNumber: input.chequeNumber,
+          chequeBank: input.chequeBank,
+          status: "PENDING_CLEARANCE",
+          ledgerId: input.ledgerId,
+        },
+        ipAddress: actor.ipAddress,
+      }, tx);
+    }
 
     return { transaction, ledger };
   }
@@ -167,19 +202,44 @@ async function validateAndRecordPayment(
     },
   });
 
+  if (actor) {
+    await createAuditLog({
+      actorId: actor.id,
+      actorName: actor.name,
+      action: "PAYMENT_RECORDED",
+      entityType: "Transaction",
+      entityId: transaction.id,
+      previousValue: {
+        paidAmount: Number(paidAmount),
+        ledgerStatus: ledger.status,
+      },
+      newValue: {
+        amount: amount.toNumber(),
+        paymentMethod: input.paymentMethod,
+        paidAmount: newPaidAmount.toNumber(),
+        ledgerStatus: newStatus,
+        status: "SUCCESS",
+        ledgerId: input.ledgerId,
+      },
+      ipAddress: actor.ipAddress,
+    }, tx);
+  }
+
   return { transaction, ledger: updatedLedger };
 }
 
 export async function recordSinglePayment(
-  input: SinglePaymentInput
+  input: SinglePaymentInput,
+  actor?: ActorInfo
 ): Promise<PaymentResult> {
   return prisma.$transaction(async (tx) => {
-    return validateAndRecordPayment(tx, input);
+    return validateAndRecordPayment(tx, input, actor);
   });
 }
 
 export async function bulkReconcile(
-  payments: BulkPaymentItem[]
+  payments: BulkPaymentItem[],
+  actor?: ActorInfo
 ): Promise<{ processed: number; results: PaymentResult[] }> {
   if (payments.length === 0) {
     throw new ValidationError("Payment array cannot be empty");
@@ -191,12 +251,14 @@ export async function bulkReconcile(
 
   return prisma.$transaction(async (tx) => {
     const results: PaymentResult[] = [];
+    const failedIndices: number[] = [];
 
     for (let i = 0; i < payments.length; i++) {
       try {
-        const result = await validateAndRecordPayment(tx, payments[i]);
+        const result = await validateAndRecordPayment(tx, payments[i], actor);
         results.push(result);
       } catch (error) {
+        failedIndices.push(i);
         if (error instanceof NotFoundError) {
           throw new ValidationError(
             `Payment at index ${i}: Ledger '${payments[i].ledgerId}' not found`
@@ -209,6 +271,28 @@ export async function bulkReconcile(
         }
         throw error;
       }
+    }
+
+    // Edge Case 4: Bulk Action Audit Gap — create parent BULK_PAYMENT entry
+    if (actor && results.length > 0) {
+      const totalAmount = results.reduce(
+        (sum, r) => sum + Number(r.transaction.amount),
+        0
+      );
+      await createAuditLog({
+        actorId: actor.id,
+        actorName: actor.name,
+        action: "BULK_PAYMENT",
+        entityType: "Transaction",
+        entityId: `bulk-${Date.now()}`,
+        newValue: {
+          count: results.length,
+          failedCount: failedIndices.length,
+          totalAmount,
+          paymentMethods: [...new Set(payments.map((p) => p.paymentMethod))],
+        },
+        ipAddress: actor.ipAddress,
+      }, tx);
     }
 
     return { processed: results.length, results };
@@ -224,7 +308,7 @@ export async function getTransactionsByLedger(ledgerId: string) {
   }
 
   return prisma.transaction.findMany({
-    where: { ledgerId },
+    where: { ledgerId, ...SOFT_DELETE_WHERE },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -248,7 +332,7 @@ export interface PendingChequeRecord {
 
 export async function getPendingCheques(): Promise<PendingChequeRecord[]> {
   const transactions = await prisma.transaction.findMany({
-    where: { status: "PENDING_CLEARANCE" },
+    where: { status: "PENDING_CLEARANCE", ...SOFT_DELETE_WHERE },
     include: {
       ledger: {
         include: {
@@ -303,7 +387,6 @@ export async function clearCheque(
       );
     }
 
-    // Edge Case 4: Race Condition - Re-fetch ledger to ensure no concurrent payment
     const ledger = await tx.studentFeeLedger.findUnique({
       where: { id: transaction.ledgerId },
     });
@@ -317,14 +400,12 @@ export async function clearCheque(
     const totalDue = totalAmount.minus(waivedAmount);
     const outstandingBefore = totalDue.minus(paidAmount);
 
-    // If already fully paid (e.g. UPI webhook arrived), abort
     if (outstandingBefore.lte(0)) {
       throw new ConflictError(
         "Fee already paid via another method. The outstanding balance is already zero."
       );
     }
 
-    // Edge Case 2: Partial Clearance - determine actual cleared amount
     const expectedAmount = new Decimal(transaction.amount.toString());
     let actualCleared = expectedAmount;
 
@@ -341,7 +422,6 @@ export async function clearCheque(
         );
       }
 
-      // Cap at outstanding balance
       if (actualCleared.gt(outstandingBefore)) {
         actualCleared = outstandingBefore;
       }
@@ -350,7 +430,6 @@ export async function clearCheque(
     const isPartial = actualCleared.lt(expectedAmount);
     const transactionStatus = isPartial ? "PARTIALLY_CLEARED" : "CLEARED";
 
-    // Update the original transaction with actual cleared amount and status
     const updatedTransaction = await tx.transaction.update({
       where: { id: input.transactionId },
       data: {
@@ -359,7 +438,6 @@ export async function clearCheque(
       },
     });
 
-    // Update ledger with actual cleared amount
     const newPaidAmount = paidAmount.plus(actualCleared);
     const newStatus = determineLedgerStatus(newPaidAmount, totalDue);
 
@@ -371,7 +449,31 @@ export async function clearCheque(
       },
     });
 
-    // If partial, create a remaining balance transaction for the uncleared portion
+    // Audit log for cheque clearance
+    if (input.actor) {
+      await createAuditLog({
+        actorId: input.actor.id,
+        actorName: input.actor.name,
+        action: "CHEQUE_CLEARED",
+        entityType: "Transaction",
+        entityId: transaction.id,
+        previousValue: {
+          status: "PENDING_CLEARANCE",
+          amount: Number(transaction.amount),
+          paidAmount: Number(paidAmount),
+        },
+        newValue: {
+          status: transactionStatus,
+          actualClearedAmount: actualCleared.toNumber(),
+          paidAmount: newPaidAmount.toNumber(),
+          ledgerStatus: newStatus,
+          isPartial,
+        },
+        reason: input.reason,
+        ipAddress: input.actor.ipAddress,
+      }, tx);
+    }
+
     let remainingTransaction: Transaction | undefined;
     if (isPartial) {
       const remaining = expectedAmount.minus(actualCleared);
@@ -398,35 +500,34 @@ export async function clearCheque(
 }
 
 // ─── Edge Case 1: Time Travel Late Fee Fix for Bounced Cheques ───────────────
-// When a cheque bounces, recalculate the ledger's totalAmount using the
-// original due date (not the bounce date). This prevents giving the parent
-// free credit for the period the cheque was pending.
 
 export async function bounceCheque(
-  transactionId: string
+  input: BounceChequeInput
 ): Promise<{ transaction: Transaction; ledger: StudentFeeLedger }> {
+  if (!input.reason || input.reason.trim().length < 10) {
+    throw new ValidationError("Reason is required and must be at least 10 characters for bouncing a cheque");
+  }
+
   return prisma.$transaction(async (tx) => {
     const transaction = await tx.transaction.findUnique({
-      where: { id: transactionId },
+      where: { id: input.transactionId },
     });
 
     if (!transaction) {
-      throw new NotFoundError("Transaction", transactionId);
+      throw new NotFoundError("Transaction", input.transactionId);
     }
 
     if (transaction.status !== "PENDING_CLEARANCE") {
       throw new ConflictError(
-        `Transaction ${transactionId} is not in PENDING_CLEARANCE status (current: ${transaction.status})`
+        `Transaction ${input.transactionId} is not in PENDING_CLEARANCE status (current: ${transaction.status})`
       );
     }
 
-    // Mark the transaction as bounced
     const updatedTransaction = await tx.transaction.update({
-      where: { id: transactionId },
+      where: { id: input.transactionId },
       data: { status: "BOUNCED" },
     });
 
-    // Fetch the ledger and its fee structure to recalculate penalty
     const ledger = await tx.studentFeeLedger.findUnique({
       where: { id: transaction.ledgerId },
       include: {
@@ -440,13 +541,12 @@ export async function bounceCheque(
       throw new NotFoundError("Ledger", transaction.ledgerId);
     }
 
-    // Edge Case 1: Time Travel Fix
-    // Recalculate the fee using the ORIGINAL due date and TODAY as the current date.
-    // This ensures the late penalty is calculated as if the payment never happened.
+    const previousTotalAmount = Number(ledger.totalAmount);
+    const previousWaivedAmount = Number(ledger.waivedAmount);
+
     const rules = (ledger.feeStructure.feeType.rules as FeeRules) ?? null;
     const baseAmount = new Decimal(ledger.feeStructure.amount.toString());
 
-    // Use original due date for penalty calculation, today as "current date"
     const recalculated = calculateFee(
       baseAmount,
       ledger.dueDate,
@@ -454,13 +554,9 @@ export async function bounceCheque(
       rules
     );
 
-    // Also recalculate waiver to be safe (waiver rules don't depend on date,
-    // but recalculating ensures consistency)
     const newTotalAmount = recalculated.totalAmount;
     const newWaivedAmount = recalculated.waiverAmount;
 
-    // Update ledger with recalculated amounts
-    // paidAmount stays the same (cheque was PENDING_CLEARANCE, never updated paidAmount)
     const updatedLedger = await tx.studentFeeLedger.update({
       where: { id: transaction.ledgerId },
       data: {
@@ -468,6 +564,30 @@ export async function bounceCheque(
         waivedAmount: toPrismaDecimal(newWaivedAmount),
       },
     });
+
+    // Audit log for cheque bounce
+    if (input.actor) {
+      await createAuditLog({
+        actorId: input.actor.id,
+        actorName: input.actor.name,
+        action: "CHEQUE_BOUNCED",
+        entityType: "Transaction",
+        entityId: transaction.id,
+        previousValue: {
+          status: "PENDING_CLEARANCE",
+          amount: Number(transaction.amount),
+          totalAmount: previousTotalAmount,
+          waivedAmount: previousWaivedAmount,
+        },
+        newValue: {
+          status: "BOUNCED",
+          totalAmount: newTotalAmount.toNumber(),
+          waivedAmount: newWaivedAmount.toNumber(),
+        },
+        reason: input.reason,
+        ipAddress: input.actor.ipAddress,
+      }, tx);
+    }
 
     return { transaction: updatedTransaction, ledger: updatedLedger };
   });

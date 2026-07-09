@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { NotFoundError, ConflictError } from "@/lib/errors";
 import { calculateFee, toPrismaDecimal, FeeRules } from "./feeEngine";
 
+const SOFT_DELETE_WHERE = { isDeleted: false } as const;
+
 export interface GenerateLedgerInput {
   class: string;
   section?: string;
@@ -34,7 +36,7 @@ export async function generateLedgersForClass(
   const { class: studentClass, section, academicSession, month, dueDate, currentDate } = input;
   const now = currentDate ?? new Date();
 
-  const where: Prisma.StudentWhereInput = { class: studentClass };
+  const where: Prisma.StudentWhereInput = { class: studentClass, ...SOFT_DELETE_WHERE };
   if (section) {
     where.section = section;
   }
@@ -44,7 +46,7 @@ export async function generateLedgersForClass(
     throw new NotFoundError("Students", `class ${studentClass}${section ? ` section ${section}` : ""}`);
   }
 
-  const feeWhere: Prisma.FeeStructureWhereInput = { class: studentClass };
+  const feeWhere: Prisma.FeeStructureWhereInput = { class: studentClass, ...SOFT_DELETE_WHERE };
   if (section) {
     feeWhere.section = section;
   }
@@ -62,6 +64,7 @@ export async function generateLedgersForClass(
     where: {
       studentId: { in: students.map((s) => s.id) },
       feeStructureId: { in: feeStructures.map((fs) => fs.id) },
+      ...SOFT_DELETE_WHERE,
     },
     select: { studentId: true, feeStructureId: true },
   });
@@ -128,16 +131,16 @@ export async function generateLedgersForClass(
 }
 
 export async function getLedgersByStudent(studentId: string) {
-  const student = await prisma.student.findUnique({ where: { id: studentId } });
+  const student = await prisma.student.findFirst({ where: { id: studentId, ...SOFT_DELETE_WHERE } });
   if (!student) {
     throw new NotFoundError("Student", studentId);
   }
 
   return prisma.studentFeeLedger.findMany({
-    where: { studentId },
+    where: { studentId, ...SOFT_DELETE_WHERE },
     include: {
       feeStructure: { include: { feeType: true } },
-      transactions: { where: { status: { in: ["SUCCESS", "CLEARED"] } } },
+      transactions: { where: { status: { in: ["SUCCESS", "CLEARED"] }, ...SOFT_DELETE_WHERE } },
     },
     orderBy: { dueDate: "desc" },
   });
@@ -145,7 +148,7 @@ export async function getLedgersByStudent(studentId: string) {
 
 export async function getDefaulters() {
   return prisma.studentFeeLedger.findMany({
-    where: { status: "OVERDUE" },
+    where: { status: "OVERDUE", ...SOFT_DELETE_WHERE },
     include: {
       student: true,
       feeStructure: { include: { feeType: true } },
@@ -162,6 +165,7 @@ export async function updateOverdueStatuses() {
     where: {
       status: { in: ["PENDING", "PARTIAL"] },
       dueDate: { lt: todayUTC },
+      ...SOFT_DELETE_WHERE,
     },
     data: { status: "OVERDUE" },
   });

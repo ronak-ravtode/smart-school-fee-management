@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
+const SOFT_DELETE_WHERE = { isDeleted: false } as const;
+
 export interface DashboardMetrics {
   totalExpected: number;
   totalCollected: number;
@@ -31,6 +33,7 @@ export interface RevenueByFeeType {
 
 export async function getMetrics(): Promise<DashboardMetrics> {
   const result = await prisma.studentFeeLedger.aggregate({
+    where: SOFT_DELETE_WHERE,
     _sum: {
       totalAmount: true,
       paidAmount: true,
@@ -42,7 +45,7 @@ export async function getMetrics(): Promise<DashboardMetrics> {
   });
 
   const overdueCount = await prisma.studentFeeLedger.count({
-    where: { status: "OVERDUE" },
+    where: { status: "OVERDUE", ...SOFT_DELETE_WHERE },
   });
 
   const totalExpected = Number(result._sum.totalAmount ?? 0);
@@ -51,7 +54,7 @@ export async function getMetrics(): Promise<DashboardMetrics> {
   const netExpected = totalExpected - totalWaived;
   const totalPending = netExpected - totalCollected;
   const totalOverdue = await prisma.studentFeeLedger.aggregate({
-    where: { status: "OVERDUE" },
+    where: { status: "OVERDUE", ...SOFT_DELETE_WHERE },
     _sum: {
       totalAmount: true,
       paidAmount: true,
@@ -86,6 +89,7 @@ export async function getDefaults(
     by: ["studentId"],
     where: {
       status: { in: ["OVERDUE", "PARTIAL"] },
+      ...SOFT_DELETE_WHERE,
     },
     _sum: {
       totalAmount: true,
@@ -108,12 +112,13 @@ export async function getDefaults(
     by: ["studentId"],
     where: {
       status: { in: ["OVERDUE", "PARTIAL"] },
+      ...SOFT_DELETE_WHERE,
     },
   });
 
   const studentIds = grouped.map((g) => g.studentId);
   const students = await prisma.student.findMany({
-    where: { id: { in: studentIds } },
+    where: { id: { in: studentIds }, ...SOFT_DELETE_WHERE },
   });
 
   const studentMap = new Map(students.map((s) => [s.id, s]));
@@ -122,6 +127,7 @@ export async function getDefaults(
     where: {
       studentId: { in: studentIds },
       status: { in: ["OVERDUE", "PARTIAL"] },
+      ...SOFT_DELETE_WHERE,
     },
     orderBy: { dueDate: "asc" },
     select: { id: true, studentId: true },
@@ -167,6 +173,7 @@ export async function getDefaults(
 export async function getRevenueBreakdown(): Promise<RevenueByFeeType[]> {
   const result = await prisma.studentFeeLedger.groupBy({
     by: ["feeStructureId"],
+    where: SOFT_DELETE_WHERE,
     _sum: {
       totalAmount: true,
     },
@@ -177,7 +184,7 @@ export async function getRevenueBreakdown(): Promise<RevenueByFeeType[]> {
 
   const feeStructureIds = result.map((r) => r.feeStructureId);
   const feeStructures = await prisma.feeStructure.findMany({
-    where: { id: { in: feeStructureIds } },
+    where: { id: { in: feeStructureIds }, ...SOFT_DELETE_WHERE },
     include: { feeType: true },
   });
 
