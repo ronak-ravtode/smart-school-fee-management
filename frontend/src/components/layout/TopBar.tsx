@@ -93,10 +93,10 @@ export function TopBar() {
         sidebarCollapsed ? "xl:left-[72px]" : "xl:left-60"
       )}
     >
-      {/* Hamburger */}
+      {/* Hamburger - only on mobile/tablet */}
       <button
         onClick={openMobileSidebar}
-        className="p-2 ml-1 md:ml-2 rounded-lg hover:bg-stone-100 transition-colors flex-shrink-0"
+        className="p-2 ml-1 md:ml-2 rounded-lg hover:bg-stone-100 transition-colors flex-shrink-0 lg:hidden"
       >
         <Menu className="w-5 h-5 text-on-surface-variant" />
       </button>
