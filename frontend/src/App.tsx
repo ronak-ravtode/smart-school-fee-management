@@ -4,10 +4,14 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
 import { SyncManager } from "@/components/sync/SyncManager";
+import { SyncConflictModal } from "@/components/sync/SyncConflictModal";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { Login } from "@/pages/Login";
 import { Dashboard } from "@/pages/Dashboard";
 import { BulkReconciliation } from "@/pages/BulkReconciliation";
+import { ChequeReconciliation } from "@/pages/ChequeReconciliation";
+import { AuditLogTable } from "@/pages/AuditLogTable";
+import { DefaulterTracker } from "@/pages/DefaulterTracker";
 import { FeeTypesPage } from "@/pages/fee-types/FeeTypesPage";
 import { FeeStructuresPage } from "@/pages/fee-types/FeeStructuresPage";
 import { GenerateLedgerPage } from "@/pages/ledgers/GenerateLedgerPage";
@@ -35,6 +39,7 @@ function App() {
   return (
     <BrowserRouter>
       <SyncManager />
+      <SyncConflictModal />
       <OfflineBanner />
       <div className={`min-h-screen ${bannerOffset} transition-all duration-300`}>
         <Routes>
@@ -48,6 +53,16 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/bulk-reconciliation" element={<BulkReconciliation />} />
+                  <Route path="/cheque-reconciliation" element={<ChequeReconciliation />} />
+                  <Route path="/defaulter-tracker" element={<DefaulterTracker />} />
+                  <Route
+                    path="/audit-trail"
+                    element={
+                      <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <AuditLogTable />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route
                     path="/fee-types"
                     element={

@@ -12,7 +12,8 @@ import {
 export const createStudent = asyncHandler(
   async (req: Request, res: Response) => {
     const data = req.body as CreateStudentInput;
-    const student = await studentService.createStudent(data);
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    const student = await studentService.createStudent(data, actor);
     res.status(201).json(sendSuccess(student, "Student created"));
   }
 );
@@ -47,7 +48,8 @@ export const updateStudent = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as StudentParamsInput;
     const data = req.body as UpdateStudentInput;
-    const student = await studentService.updateStudent(id, data);
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    const student = await studentService.updateStudent(id, data, actor);
     res.json(sendSuccess(student, "Student updated"));
   }
 );
@@ -55,7 +57,9 @@ export const updateStudent = asyncHandler(
 export const deleteStudent = asyncHandler(
   async (req: Request, res: Response) => {
     const { id } = req.params as StudentParamsInput;
-    await studentService.deleteStudent(id);
+    const { reason } = req.body as { reason?: string };
+    const actor = req.user ? { actorId: req.user.id, actorName: req.user.name, ipAddress: req.ip } : undefined;
+    await studentService.deleteStudent(id, actor, reason);
     res.json(sendSuccess(null, "Student deleted"));
   }
 );

@@ -2,13 +2,31 @@ import { z } from "zod";
 
 const PaymentMethodEnum = z.enum(["UPI", "CASH", "CHEQUE"]);
 
+const ExpectedServerStateSchema = z.object({
+  outstandingBalance: z.number(),
+  paidAmount: z.number(),
+  lastUpdatedAt: z.string(),
+}).optional();
+
 export const SinglePaymentSchema = z.object({
   ledgerId: z.string().uuid("Invalid ledger ID"),
   amount: z.number().positive("Amount must be positive"),
   paymentMethod: PaymentMethodEnum,
   transactionRef: z.string().max(100).optional(),
   receiptNumber: z.string().max(50).optional(),
-});
+  chequeNumber: z.string().max(50).optional(),
+  chequeBank: z.string().max(100).optional(),
+  chequeIssueDate: z.string().optional(),
+  expectedServerState: ExpectedServerStateSchema,
+}).refine(
+  (data) => {
+    if (data.paymentMethod === "CHEQUE") {
+      return !!data.chequeNumber && !!data.chequeBank && !!data.chequeIssueDate;
+    }
+    return true;
+  },
+  { message: "Cheque number, bank name, and issue date are required for cheque payments" }
+);
 
 const BulkPaymentItemSchema = z.object({
   ledgerId: z.string().uuid("Invalid ledger ID"),
@@ -16,7 +34,18 @@ const BulkPaymentItemSchema = z.object({
   paymentMethod: PaymentMethodEnum,
   transactionRef: z.string().max(100).optional(),
   receiptNumber: z.string().max(50).optional(),
-});
+  chequeNumber: z.string().max(50).optional(),
+  chequeBank: z.string().max(100).optional(),
+  chequeIssueDate: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.paymentMethod === "CHEQUE") {
+      return !!data.chequeNumber && !!data.chequeBank && !!data.chequeIssueDate;
+    }
+    return true;
+  },
+  { message: "Cheque number, bank name, and issue date are required for cheque payments" }
+);
 
 export const BulkReconcileSchema = z.object({
   payments: z
@@ -29,8 +58,21 @@ export const LedgerTransactionsParamsSchema = z.object({
   ledgerId: z.string().uuid("Invalid ledger ID"),
 });
 
+export const ReconcileChequeSchema = z.object({
+  transactionId: z.string().uuid("Invalid transaction ID"),
+  actualClearedAmount: z.number().positive("Cleared amount must be positive").optional(),
+  reason: z.string().optional(),
+});
+
+export const BounceChequeSchema = z.object({
+  transactionId: z.string().uuid("Invalid transaction ID"),
+  reason: z.string().min(10, "Reason is required and must be at least 10 characters"),
+});
+
 export type SinglePaymentInput = z.infer<typeof SinglePaymentSchema>;
 export type BulkReconcileInput = z.infer<typeof BulkReconcileSchema>;
 export type LedgerTransactionsParams = z.infer<
   typeof LedgerTransactionsParamsSchema
 >;
+export type ReconcileChequeInput = z.infer<typeof ReconcileChequeSchema>;
+export type BounceChequeInput = z.infer<typeof BounceChequeSchema>;

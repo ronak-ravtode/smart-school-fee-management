@@ -37,8 +37,13 @@ export const FeeTypeParamsSchema = z.object({
   id: z.string().uuid("Invalid fee type ID"),
 });
 
+export const DeleteFeeTypeSchema = z.object({
+  reason: z.string().min(10, "Reason is required and must be at least 10 characters"),
+});
+
 export type CreateFeeTypeInput = z.infer<typeof CreateFeeTypeSchema>;
 export type UpdateFeeTypeInput = z.infer<typeof UpdateFeeTypeSchema>;
 export type FeeTypeQueryInput = z.infer<typeof FeeTypeQuerySchema>;
 export type FeeTypeParamsInput = z.infer<typeof FeeTypeParamsSchema>;
+export type DeleteFeeTypeInput = z.infer<typeof DeleteFeeTypeSchema>;
 export type FeeRules = z.infer<typeof FeeRulesSchema>;

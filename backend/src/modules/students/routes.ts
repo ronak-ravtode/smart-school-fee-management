@@ -5,6 +5,7 @@ import {
   UpdateStudentSchema,
   StudentQuerySchema,
   StudentParamsSchema,
+  DeleteStudentSchema,
 } from "./schemas";
 import {
   createStudent,
@@ -44,6 +45,7 @@ router.put(
 router.delete(
   "/:id",
   validate(StudentParamsSchema, "params"),
+  validate(DeleteStudentSchema, "body"),
   deleteStudent
 );
 

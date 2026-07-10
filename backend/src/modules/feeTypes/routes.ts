@@ -5,6 +5,7 @@ import {
   UpdateFeeTypeSchema,
   FeeTypeQuerySchema,
   FeeTypeParamsSchema,
+  DeleteFeeTypeSchema,
 } from "./schemas";
 import {
   createFeeType,
@@ -44,6 +45,7 @@ router.put(
 router.delete(
   "/:id",
   validate(FeeTypeParamsSchema, "params"),
+  validate(DeleteFeeTypeSchema, "body"),
   deleteFeeType
 );
 

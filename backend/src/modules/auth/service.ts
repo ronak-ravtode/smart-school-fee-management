@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { prisma } from "@/lib/prisma";
-import { NotFoundError, ValidationError, ConflictError } from "@/lib/errors";
+import { User } from "@/models";
+import { ValidationError, ConflictError } from "@/lib/errors";
 
 const JWT_SECRET = process.env.JWT_SECRET || "smartschool-jwt-secret-key-change-in-production";
 const JWT_EXPIRES_IN = "7d";
@@ -13,58 +13,27 @@ export interface AuthUser {
   role: "ADMIN" | "CASHIER";
 }
 
-export async function loginUser(
-  email: string,
-  password: string
-): Promise<{ user: AuthUser; token: string }> {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    throw new ValidationError("Invalid email or password");
-  }
+export async function loginUser(email: string, password: string): Promise<{ user: AuthUser; token: string }> {
+  const user = await User.findOne({ email });
+  if (!user) throw new ValidationError("Invalid email or password");
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-  if (!isPasswordValid) {
-    throw new ValidationError("Invalid email or password");
-  }
+  if (!isPasswordValid) throw new ValidationError("Invalid email or password");
 
-  const authUser: AuthUser = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-  };
-
+  const authUser: AuthUser = { id: user._id.toString(), email: user.email, name: user.name, role: user.role };
   const token = jwt.sign(authUser, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
   return { user: authUser, token };
 }
 
-export async function signupUser(
-  name: string,
-  email: string,
-  password: string,
-  role: "ADMIN" | "CASHIER" = "CASHIER"
-): Promise<{ user: AuthUser; token: string }> {
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    throw new ConflictError("A user with this email already exists");
-  }
+export async function signupUser(name: string, email: string, password: string, role: "ADMIN" | "CASHIER" = "CASHIER"): Promise<{ user: AuthUser; token: string }> {
+  const existing = await User.findOne({ email });
+  if (existing) throw new ConflictError("A user with this email already exists");
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const user = await User.create({ name, email, passwordHash, role });
 
-  const user = await prisma.user.create({
-    data: { name, email, passwordHash, role },
-  });
-
-  const authUser: AuthUser = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-  };
-
+  const authUser: AuthUser = { id: user._id.toString(), email: user.email, name: user.name, role: user.role };
   const token = jwt.sign(authUser, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-
   return { user: authUser, token };
 }
 

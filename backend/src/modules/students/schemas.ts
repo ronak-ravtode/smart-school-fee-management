@@ -28,7 +28,12 @@ export const StudentParamsSchema = z.object({
   id: z.string().uuid("Invalid student ID"),
 });
 
+export const DeleteStudentSchema = z.object({
+  reason: z.string().min(10, "Reason is required and must be at least 10 characters"),
+});
+
 export type CreateStudentInput = z.infer<typeof CreateStudentSchema>;
 export type UpdateStudentInput = z.infer<typeof UpdateStudentSchema>;
 export type StudentQueryInput = z.infer<typeof StudentQuerySchema>;
 export type StudentParamsInput = z.infer<typeof StudentParamsSchema>;
+export type DeleteStudentInput = z.infer<typeof DeleteStudentSchema>;
